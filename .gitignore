@@ -5,6 +5,7 @@
 *.iml
 assets
 bin
+lib
 build
 obj
 local.properties
