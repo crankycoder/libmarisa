@@ -6,7 +6,6 @@
 assets
 bin
 build
-jni
 obj
 local.properties
 gradle.properties
