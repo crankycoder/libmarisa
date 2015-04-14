@@ -12,9 +12,11 @@ android {
         versionName "1.0"
     }
 
-    sourceSets.main {
-        jni.srcDirs = [] // This prevents the auto generation of Android.mk
-        jniLibs.srcDir 'src/main/libs' // This is not necessary unless you have precompiled libraries in your project
+    sourceSets {
+        main {
+            jni.srcDirs = [] // This prevents the auto generation of Android.mk
+            jniLibs.srcDir 'src/main/libs' // This is not necessary unless you have precompiled libraries in your project
+        }
     }
 
     buildTypes {
@@ -28,9 +30,14 @@ android {
         commandLine 'ndk-build', '-C', file('src/main').absolutePath
     }
 
+    // You'll need to comment out this block to generate the initial
+    // JNI stubs with `make jni_stubs`.  Gradle doesn't have a javah
+    // task, and invoking apache ant's javah task is not obvious as
+    // obtaining the compile time classpath is crazy.
     tasks.withType(JavaCompile) {
         compileTask -> compileTask.dependsOn ndkBuild
     }
+
 }
 
 dependencies {
