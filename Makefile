@@ -14,4 +14,6 @@ install:
 
 clean:
 	./gradlew clean
-	rm -rf lib
+	rm -rf app/src/main/libs
+	rm -rf app/src/main/obj
+	rm -rf build
