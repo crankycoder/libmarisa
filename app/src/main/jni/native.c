@@ -1,4 +1,4 @@
-#include <jni.h>
+#include <com_crankycoder_ndk1_AndroidNDK1SampleActivity.h>
 #include <string.h>
 #include <android/log.h>
 

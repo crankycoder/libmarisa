@@ -1,7 +1,6 @@
 all:
 	./gradlew build
 
-
 make_stubs:
 	# This is the dumbest thing ever.  Why in the hell doesn't the IDE
 	# do this for me????
