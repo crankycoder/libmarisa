@@ -5,8 +5,9 @@
 *.iml
 assets
 bin
-gen
 build
+jni
+obj
 local.properties
 gradle.properties
 bintray.properties
@@ -17,15 +18,12 @@ bintray.properties
 # JAR releases
 android/libs/*.jar
 
+# Ignore libraries
+libs
+
 # ctags
 tags
 
-
-# Mozilla Special Sauce
-# Never commit your private.properties file or your keystore
-android/properties/**
-
-*.keystore
 
 # Ignore final release APK builds
 outputs/*
