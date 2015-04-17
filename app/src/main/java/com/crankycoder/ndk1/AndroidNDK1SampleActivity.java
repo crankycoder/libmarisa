@@ -2,20 +2,16 @@ package com.crankycoder.ndk1;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.crankycoder.marisa.Trie;
+
 
 public class AndroidNDK1SampleActivity extends ActionBarActivity {
-    static {
-        System.loadLibrary("ndk1");
-    }
-
-    private native void helloLog(String logThis);
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,7 +21,7 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                helloLog("This will log to LogCat via the native call.");
+                Log.i("libmarisa", new Trie().doTheThing());
             }
         });
 
