@@ -6,11 +6,11 @@
 
 namespace marisa {
 namespace grimoire {
-namespace trie {
+    namespace trie {
 
-class LoudsTrie;
+        class LoudsTrie;
 
-}  // namespace trie
+    }  // namespace trie
 }  // namespace grimoire
 
 class Trie {

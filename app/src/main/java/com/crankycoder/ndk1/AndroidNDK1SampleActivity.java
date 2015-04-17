@@ -21,7 +21,9 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("libmarisa", new Trie().doTheThing());
+                Trie t = new Trie();
+                Log.i("libmarisa", t.doTheThing());
+                Log.i("libmarisa", t.dealloc());
             }
         });
 

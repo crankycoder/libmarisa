@@ -8,10 +8,18 @@ public class Trie {
     }
 
     native long newTrie();
+    native void deallocTrie(long handle);
 
+    long handle;
 
     public String doTheThing() {
-        return "Should get 5555: " + newTrie();
+        handle = newTrie();
+        return "Should get 5555: " + handle;
+    }
+
+    public String dealloc() {
+        deallocTrie(handle);
+        return "Deallocated trie!";
     }
 
 }
