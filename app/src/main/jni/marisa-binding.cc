@@ -69,7 +69,7 @@ Java_com_crankycoder_marisa_Agent_setQuery(JNIEnv *env,
 
 }
 
-extern "C" JNIEXPORT long JNICALL
+extern "C" JNIEXPORT jlong JNICALL
 Java_com_crankycoder_marisa_Agent_getKeyHandle(JNIEnv *env,
                                             jclass,
                                             jlong agentHandle)
@@ -79,3 +79,29 @@ Java_com_crankycoder_marisa_Agent_getKeyHandle(JNIEnv *env,
 
     return (jlong) &(_agent->key());
 }
+
+/*
+ Key APIs
+ */
+
+ extern "C" JNIEXPORT jbyteArray JNICALL
+ Java_com_crankycoder_marisa_Key_ptr(JNIEnv *env,
+                                             jclass,
+                                             jlong keyHandle)
+ {
+
+     /* Extract the char* data and return it as a byte array */
+     marisa::Key* _key;
+     _key = (marisa::Key*) keyHandle;
+
+     const char* data =  _key->ptr();
+
+     int n = 0;
+     while (*data++) {
+        n++;
+     } if (n <= 0) return NULL;
+
+     jbyteArray arr = env->NewByteArray(n);
+     env->SetByteArrayRegion(arr, 0, n, (jbyte*)data);
+     return arr;
+ }

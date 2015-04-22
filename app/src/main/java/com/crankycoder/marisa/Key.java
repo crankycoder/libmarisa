@@ -5,10 +5,18 @@
 package com.crankycoder.marisa;
 
 public class Key {
+    static {
+        System.loadLibrary("stlport_shared");
+        System.loadLibrary("marisa");
+    }
 
     public long handle;
 
     public Key(long keyHandle) {
         handle = keyHandle;
+    }
+
+    public String ptr() {
+        return null;
     }
 }
