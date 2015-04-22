@@ -13,8 +13,10 @@ public class Trie {
     native long newTrie();
     native void deallocTrie(long handle);
     native long mmapFile(long handle, String path);
+    native boolean predictiveSearch(long handle,
+                                    long agentHandle);
 
-    public long handle;
+    long handle;
 
     public Trie() {
         handle = newTrie();
@@ -32,6 +34,8 @@ public class Trie {
         handle = mmapFile(handle, path);
     }
 
-
+    public boolean predictive_search(Agent ag) {
+        return predictiveSearch(handle, ag.handle);
+    }
 
 }

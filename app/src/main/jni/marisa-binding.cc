@@ -42,6 +42,22 @@ Java_com_crankycoder_marisa_Trie_mmapFile(JNIEnv *env,
 }
 
 
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_crankycoder_marisa_Trie_predictiveSearch(JNIEnv *env,
+                                                  jclass,
+                                                  jlong handle,
+                                                  jlong agentHandle)
+{
+    marisa::Trie* _trie;
+    marisa::Agent* _agent;
+    _trie = (marisa::Trie*) handle;
+    _agent = (marisa::Agent*) agentHandle;
+
+    return (jboolean) _trie->predictive_search(*_agent);
+}
+
+
 /*
  Agent APIs
  */

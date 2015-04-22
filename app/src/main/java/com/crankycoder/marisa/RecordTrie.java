@@ -7,15 +7,15 @@ package com.crankycoder.marisa;
 /*
  This class provides a subset of the API that the RecordTrie in Python provides.
  */
-public class RecordTrie {
+public class RecordTrie extends Trie {
+
+    private final String struct_fmt;
 
     // Initialize the RecordTrie
     public RecordTrie(String fmt) {
-        // TODO
+        struct_fmt = fmt;
     }
 
-    // Loads trie data using mmap operation
-    public void mmap(String filename) {
-        // TODO
-    }
+
+
 }
