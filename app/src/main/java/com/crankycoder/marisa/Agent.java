@@ -15,7 +15,7 @@ public class Agent {
     }
 
     native long newAgent();
-
+    native long getKeyHandle();
     native void setQuery(long handle, String prefix);
 
     private final long handle;
@@ -26,5 +26,9 @@ public class Agent {
 
     public void set_query(String prefix) {
         setQuery(handle, prefix);
+    }
+
+    public Key key() {
+        return new Key(getKeyHandle());
     }
 }

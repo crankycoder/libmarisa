@@ -5,6 +5,10 @@
 package com.crankycoder.marisa;
 
 public class Key {
+
+    public long handle;
+
     public Key(long keyHandle) {
+        handle = keyHandle;
     }
 }

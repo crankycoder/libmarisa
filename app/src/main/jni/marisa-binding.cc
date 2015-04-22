@@ -68,3 +68,14 @@ Java_com_crankycoder_marisa_Agent_setQuery(JNIEnv *env,
     _agent->set_query(nativePrefix);
 
 }
+
+extern "C" JNIEXPORT long JNICALL
+Java_com_crankycoder_marisa_Agent_getKeyHandle(JNIEnv *env,
+                                            jclass,
+                                            jlong agentHandle)
+{
+    marisa::Agent* _agent;
+    _agent = (marisa::Agent*) agentHandle;
+
+    return (jlong) &(_agent->key());
+}
