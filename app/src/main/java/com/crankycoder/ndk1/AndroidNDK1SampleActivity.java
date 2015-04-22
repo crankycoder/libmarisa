@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.crankycoder.marisa.Agent;
 import com.crankycoder.marisa.Trie;
 
 
@@ -24,6 +25,11 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
                 Trie t = new Trie();
                 Log.i("libmarisa", "Trie handle: " + t.handle);
                 t.dealloc();
+
+                Agent ag = new Agent();
+                ag.set_query("abcdef");
+                ag.key();
+                Log.i("libmarisa", "Success fetching key from agent");
             }
         });
 
