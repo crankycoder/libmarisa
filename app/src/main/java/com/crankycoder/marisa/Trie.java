@@ -7,19 +7,31 @@ public class Trie {
         System.loadLibrary("marisa");
     }
 
+
+    public static byte _VALUE_SEPARATOR = (byte) 0xff;
+
     native long newTrie();
     native void deallocTrie(long handle);
+    native long mmapFile(long handle, String path);
 
-    long handle;
+    public long handle;
 
-    public String doTheThing() {
+    public Trie() {
         handle = newTrie();
-        return "Should get 5555: " + handle;
     }
 
-    public String dealloc() {
+    public void dealloc() {
         deallocTrie(handle);
-        return "Deallocated trie!";
     }
+
+    public void mmap(String path) {
+        /*
+         * Mmap trie to a file; this allows lookups without loading full
+         * trie to memory.
+         */
+        handle = mmapFile(handle, path);
+    }
+
+
 
 }

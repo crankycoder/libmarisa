@@ -22,8 +22,8 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 Trie t = new Trie();
-                Log.i("libmarisa", t.doTheThing());
-                Log.i("libmarisa", t.dealloc());
+                Log.i("libmarisa", "Trie handle: " + t.handle);
+                t.dealloc();
             }
         });
 
