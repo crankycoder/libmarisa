@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.crankycoder.marisa.Agent;
-import com.crankycoder.marisa.Trie;
+import com.crankycoder.marisa._Trie;
 
 
 public class AndroidNDK1SampleActivity extends ActionBarActivity {
@@ -22,12 +22,12 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Trie t = new Trie();
+                _Trie t = new _Trie();
                 Log.i("libmarisa", "Trie handle: " + t.handle);
                 t.dealloc();
 
                 Agent ag = new Agent();
-                ag.set_query("abcdef");
+                ag.b_set_query("abcdef");
                 ag.key();
                 Log.i("libmarisa", "Success fetching key from agent");
             }

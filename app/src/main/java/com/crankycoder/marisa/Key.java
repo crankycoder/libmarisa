@@ -10,13 +10,15 @@ public class Key {
         System.loadLibrary("marisa");
     }
 
-    public long handle;
+    native byte[] keyPtr(long keyHandle);
+
+    long handle;
 
     public Key(long keyHandle) {
         handle = keyHandle;
     }
 
-    public String ptr() {
-        return null;
+    public byte[] ptr() {
+        return keyPtr(handle);
     }
 }

@@ -1,6 +1,8 @@
 #include <jni.h>
 #include <android/log.h>
 #include <lib/marisa/trie.h>
+#include <memory.h>
+#include <cstring>
 
 
 /*
@@ -71,17 +73,25 @@ Java_com_crankycoder_marisa_Agent_newAgent(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_crankycoder_marisa_Agent_setQuery(JNIEnv *env,
+Java_com_crankycoder_marisa_Agent_bSetQuery(JNIEnv *env,
                                             jclass,
                                             jlong agentHandle,
                                             jstring prefix)
 {
+    // This is a hack of set_query which hardcodes
+    // the 0xff byte pad at the end of the key so that
+    // we can query ByteTrie objects.
+    const char _VALUE_SEPARATOR = 0xff;
     const char *nativePrefix = env->GetStringUTFChars(prefix, 0);
-
     marisa::Agent* _agent;
     _agent = (marisa::Agent*) agentHandle;
 
-    _agent->set_query(nativePrefix);
+    char* b_prefix = (char *) malloc(1+strlen(nativePrefix)+1);
+
+    strcpy(b_prefix, nativePrefix);
+    b_prefix[strlen(nativePrefix)] = _VALUE_SEPARATOR;
+
+    _agent->set_query(b_prefix);
 
 }
 
@@ -101,7 +111,7 @@ Java_com_crankycoder_marisa_Agent_getKeyHandle(JNIEnv *env,
  */
 
  extern "C" JNIEXPORT jbyteArray JNICALL
- Java_com_crankycoder_marisa_Key_ptr(JNIEnv *env,
+ Java_com_crankycoder_marisa_Key_keyPtr(JNIEnv *env,
                                              jclass,
                                              jlong keyHandle)
  {

@@ -7,7 +7,7 @@ package com.crankycoder.marisa;
 /*
  This class provides a subset of the API that the RecordTrie in Python provides.
  */
-public class RecordTrie extends Trie {
+public class RecordTrie extends _UnpackTrie {
 
     private final String struct_fmt;
 
@@ -15,7 +15,5 @@ public class RecordTrie extends Trie {
     public RecordTrie(String fmt) {
         struct_fmt = fmt;
     }
-
-
 
 }

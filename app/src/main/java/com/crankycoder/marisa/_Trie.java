@@ -1,6 +1,6 @@
 package com.crankycoder.marisa;
 
-public class Trie {
+public class _Trie {
 
     static {
         System.loadLibrary("stlport_shared");
@@ -8,17 +8,15 @@ public class Trie {
     }
 
 
-    public static byte _VALUE_SEPARATOR = (byte) 0xff;
-
     native long newTrie();
     native void deallocTrie(long handle);
     native long mmapFile(long handle, String path);
     native boolean predictiveSearch(long handle,
                                     long agentHandle);
 
-    long handle;
+    public long handle;
 
-    public Trie() {
+    public _Trie() {
         handle = newTrie();
     }
 
