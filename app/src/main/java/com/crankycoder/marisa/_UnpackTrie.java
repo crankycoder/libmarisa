@@ -4,7 +4,21 @@
 
 package com.crankycoder.marisa;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class _UnpackTrie extends BytesTrie {
 
+    @Override
+    public List<byte[]> b_get_value(String key) {
+        List<byte[]> result = new LinkedList<byte[]>();
+        for (byte[] v: super.b_get_value(key)) {
+            result.add(_unpack(v));
+        }
+        return result;
+    }
 
+    public byte[] _unpack(byte[] x) {
+        return x;
+    }
 }

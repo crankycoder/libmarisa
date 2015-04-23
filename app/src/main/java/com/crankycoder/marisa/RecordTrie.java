@@ -16,4 +16,10 @@ public class RecordTrie extends _UnpackTrie {
         struct_fmt = fmt;
     }
 
+    @Override
+    public byte[] _unpack(byte[] x) {
+        byte[] tmp = super._unpack(x);
+        // TODO: unpack the data here using the struct format.
+        return tmp;
+    }
 }

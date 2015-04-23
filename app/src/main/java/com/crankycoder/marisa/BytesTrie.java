@@ -25,7 +25,7 @@ public class BytesTrie extends _Trie {
         while (predictive_search(ag)) {
             byte[] slice = ag.key().ptr();
             byte[] subArray = Arrays.copyOfRange(slice, prefix_len, ag.key().length());
-            result.add(subArray);   
+            result.add(subArray);
         }
         return result;
     }
