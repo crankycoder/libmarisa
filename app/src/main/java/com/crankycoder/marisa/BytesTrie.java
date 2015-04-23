@@ -10,17 +10,20 @@ import java.util.List;
 
 public class BytesTrie extends _Trie {
 
-    public List<byte[]> b_get_value(String key) {
+    public List<byte[]> b_get_value(byte[] byte_key) {
+
+        byte _VALUE_SEPARATOR = (byte)0xff;
 
         LinkedList<byte[]> result = new LinkedList<byte[]>();
 
+        byte[] b_prefix = Arrays.copyOf(byte_key, byte_key.length+1);
+        b_prefix[b_prefix.length-1] = _VALUE_SEPARATOR;
+
         Agent ag = new Agent();
 
-        // TODO: b_set_query should really take in a byte array
-        // so that we can properly compute `prefix_len`
-        ag.b_set_query(key);
+        ag.b_set_query(b_prefix);
 
-        int prefix_len = key.length()+1;
+        int prefix_len = b_prefix.length;
 
         while (predictive_search(ag)) {
             byte[] slice = ag.key().ptr();

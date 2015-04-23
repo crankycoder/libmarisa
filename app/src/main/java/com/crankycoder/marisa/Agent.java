@@ -16,7 +16,7 @@ public class Agent {
 
     private native long newAgent();
     private native long getKeyHandle();
-    private native void bSetQuery(long handle, String prefix);
+    private native void bSetQuery(long handle, byte[] b_prefix);
 
     final long handle;
 
@@ -24,8 +24,8 @@ public class Agent {
         handle = newAgent();
     }
 
-    public void b_set_query(String prefix) {
-        bSetQuery(handle, prefix);
+    public void b_set_query(byte[] b_prefix) {
+        bSetQuery(handle, b_prefix);
     }
 
     public Key key() {

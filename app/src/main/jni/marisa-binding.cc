@@ -4,6 +4,16 @@
 #include <memory.h>
 #include <cstring>
 
+/*********************************
+ * Utility functions to convert jbyteArray to char* and back
+ */
+
+char* as_char_array(JNIEnv *env, jbyteArray array) {
+    int len = env->GetArrayLength (array);
+    char* buf = new char[len];
+    env->GetByteArrayRegion (array, 0, len, reinterpret_cast<jbyte*>(buf));
+    return buf;
+}
 
 /*
  Trie APIs
@@ -76,23 +86,18 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_crankycoder_marisa_Agent_bSetQuery(JNIEnv *env,
                                             jclass,
                                             jlong agentHandle,
-                                            jstring prefix)
+                                            jbyteArray jbyte_prefix)
 {
     // This is a hack of set_query which hardcodes
     // the 0xff byte pad at the end of the key so that
     // we can query ByteTrie objects.
-    const char _VALUE_SEPARATOR = 0xff;
-    const char *nativePrefix = env->GetStringUTFChars(prefix, 0);
     marisa::Agent* _agent;
     _agent = (marisa::Agent*) agentHandle;
 
-    char* b_prefix = (char *) malloc(1+strlen(nativePrefix)+1);
-
-    strcpy(b_prefix, nativePrefix);
-    b_prefix[strlen(nativePrefix)] = _VALUE_SEPARATOR;
+    // TODO: we need to free this char* array
+    char* b_prefix = as_char_array(env, jbyte_prefix);
 
     _agent->set_query(b_prefix);
-
 }
 
 extern "C" JNIEXPORT jlong JNICALL
@@ -141,3 +146,5 @@ Java_com_crankycoder_marisa_Agent_getKeyHandle(JNIEnv *env,
     _key = (marisa::Key*) keyHandle;
     return (jint) _key->length();
 }
+
+

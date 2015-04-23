@@ -11,8 +11,6 @@ public class Key {
     }
 
     private native byte[] keyPtr(long keyHandle);
-
-    // TODO: bind this
     private native int keyLength(long keyHandle);
 
     long handle;

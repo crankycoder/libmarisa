@@ -27,7 +27,7 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
                 t.dealloc();
 
                 Agent ag = new Agent();
-                ag.b_set_query("abcdef");
+                ag.b_set_query("abcdef".getBytes());
                 ag.key();
                 Log.i("libmarisa", "Success fetching key from agent");
             }
