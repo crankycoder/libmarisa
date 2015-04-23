@@ -1,5 +1,7 @@
 package com.crankycoder.marisa;
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -49,6 +51,8 @@ public class Trie {
 
 
     public boolean predictive_search(Agent ag) {
+        Log.i("libmarisa", "predictive search starting");
+
         return predictiveSearch(handle, ag.handle);
     }
 

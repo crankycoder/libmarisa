@@ -103,18 +103,20 @@ Java_com_crankycoder_marisa_Agent_bSetQuery(JNIEnv *env,
     marisa::Agent* _agent;
     _agent = (marisa::Agent*) agentHandle;
 
-    int len = env->GetArrayLength(jbyte_prefix);
+    int textLength = env->GetArrayLength(jbyte_prefix);
 
     // This is properly showing a length of 4
-    __android_log_print(ANDROID_LOG_INFO, "libmarisa", "jbyte_prefix length: %d", len);
+    __android_log_print(ANDROID_LOG_INFO, "libmarisa", "jbyte_prefix length: %d", textLength);
 
 
-    // TODO: i'm doing something wrong here. I need the char* strlen to be 4 which
-    // is 'bar' + 0xff.  The b_prefix strlen is showing up as *5* though.
+    jboolean isCopy;
+    jbyte* a = env->GetByteArrayElements(jbyte_prefix, &isCopy);
+    char* b_prefix = new char[textLength + 1];
+    memcpy(b_prefix, a, textLength);
+    b_prefix[textLength] = '\0';
 
-    char* b_prefix = (char *) env->GetByteArrayElements(jbyte_prefix, 0);
      __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix length: %d", strlen(b_prefix));
-     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix : [%s]", b_prefix);
+    // __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix : [%s]", b_prefix);
     _agent->set_query(b_prefix);
 
     return (jlong) b_prefix;

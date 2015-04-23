@@ -52,9 +52,13 @@ public class BytesTrie extends Trie {
 
         ag.b_set_query(b_prefix);
 
+        Log.i("libmarisa", "Agent query is set");
+
         int prefix_len = b_prefix.length;
 
+
         while (predictive_search(ag)) {
+
             byte[] slice = ag.key().ptr();
             byte[] subArray = Arrays.copyOfRange(slice, prefix_len, ag.key().length());
             result.add(subArray);
