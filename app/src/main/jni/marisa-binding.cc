@@ -131,3 +131,13 @@ Java_com_crankycoder_marisa_Agent_getKeyHandle(JNIEnv *env,
      env->SetByteArrayRegion(arr, 0, n, (jbyte*)data);
      return arr;
  }
+
+ extern "C" JNIEXPORT jint JNICALL
+  Java_com_crankycoder_marisa_Key_keyLength(JNIEnv *env,
+                                              jclass,
+                                              jlong keyHandle)
+{
+    marisa::Key* _key;
+    _key = (marisa::Key*) keyHandle;
+    return (jint) _key->length();
+}

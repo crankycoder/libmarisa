@@ -4,6 +4,7 @@
 
 package com.crankycoder.marisa;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -14,7 +15,18 @@ public class BytesTrie extends _Trie {
         LinkedList<byte[]> result = new LinkedList<byte[]>();
 
         Agent ag = new Agent();
+
+        // TODO: b_set_query should really take in a byte array
+        // so that we can properly compute `prefix_len`
         ag.b_set_query(key);
+
+        int prefix_len = key.length()+1;
+
+        while (predictive_search(ag)) {
+            byte[] slice = ag.key().ptr();
+            byte[] subArray = Arrays.copyOfRange(slice, prefix_len, ag.key().length());
+            result.add(subArray);   
+        }
         return result;
     }
 

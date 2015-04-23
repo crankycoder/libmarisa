@@ -10,7 +10,10 @@ public class Key {
         System.loadLibrary("marisa");
     }
 
-    native byte[] keyPtr(long keyHandle);
+    private native byte[] keyPtr(long keyHandle);
+
+    // TODO: bind this
+    private native int keyLength(long keyHandle);
 
     long handle;
 
@@ -21,4 +24,9 @@ public class Key {
     public byte[] ptr() {
         return keyPtr(handle);
     }
+
+    public int length() {
+        return keyLength(handle);
+    }
+
 }

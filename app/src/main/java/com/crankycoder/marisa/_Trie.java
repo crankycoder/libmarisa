@@ -8,10 +8,10 @@ public class _Trie {
     }
 
 
-    native long newTrie();
-    native void deallocTrie(long handle);
-    native long mmapFile(long handle, String path);
-    native boolean predictiveSearch(long handle,
+    private native long newTrie();
+    private native void deallocTrie(long handle);
+    private native long mmapFile(long handle, String path);
+    private native boolean predictiveSearch(long handle,
                                     long agentHandle);
 
     public long handle;

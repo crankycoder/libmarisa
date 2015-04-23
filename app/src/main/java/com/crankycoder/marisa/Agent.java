@@ -14,9 +14,9 @@ public class Agent {
         System.loadLibrary("marisa");
     }
 
-    native long newAgent();
-    native long getKeyHandle();
-    native void bSetQuery(long handle, String prefix);
+    private native long newAgent();
+    private native long getKeyHandle();
+    private native void bSetQuery(long handle, String prefix);
 
     final long handle;
 
