@@ -1,6 +1,11 @@
 package com.crankycoder.marisa;
 
-public class _Trie {
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.nio.charset.Charset;
+
+public class Trie {
 
     static {
         System.loadLibrary("stlport_shared");
@@ -14,9 +19,12 @@ public class _Trie {
     private native boolean predictiveSearch(long handle,
                                     long agentHandle);
 
+
+    private native void load(long handle, String filePath);
+
     public long handle;
 
-    public _Trie() {
+    public Trie() {
         handle = newTrie();
     }
 
@@ -24,6 +32,9 @@ public class _Trie {
         deallocTrie(handle);
     }
 
+    /*
+     This seems to be broken on Android
+     */
     public void mmap(String path) {
         /*
          * Mmap trie to a file; this allows lookups without loading full
@@ -31,6 +42,11 @@ public class _Trie {
          */
         handle = mmapFile(handle, path);
     }
+
+    public void load(String path) {
+        load(handle, path);
+    }
+
 
     public boolean predictive_search(Agent ag) {
         return predictiveSearch(handle, ag.handle);

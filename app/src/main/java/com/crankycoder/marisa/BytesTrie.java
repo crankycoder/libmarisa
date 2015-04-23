@@ -4,13 +4,30 @@
 
 package com.crankycoder.marisa;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class BytesTrie extends _Trie {
+public class BytesTrie extends Trie {
 
-    public List<byte[]> b_get_value(byte[] byte_key) {
+    /*
+     Return a list of payloads (as byte objects) for a given key.
+     */
+    public List<byte[]> get(byte[] b_key) {
+        return b_get_value(b_key);
+    }
+
+
+    /*
+     Return a list of payloads (as byte objects) for a given key.
+     */
+    public List<byte[]> get(String key) {
+        return b_get_value(key.getBytes(Charset.forName("UTF-8")));
+    }
+
+
+    List<byte[]> b_get_value(byte[] byte_key) {
 
         byte _VALUE_SEPARATOR = (byte)0xff;
 
@@ -30,6 +47,8 @@ public class BytesTrie extends _Trie {
             byte[] subArray = Arrays.copyOfRange(slice, prefix_len, ag.key().length());
             result.add(subArray);
         }
+
+        ag.dealloc();
         return result;
     }
 

@@ -4,17 +4,6 @@
 #include <memory.h>
 #include <cstring>
 
-/*********************************
- * Utility functions to convert jbyteArray to char* and back
- */
-
-char* as_char_array(JNIEnv *env, jbyteArray array) {
-    int len = env->GetArrayLength (array);
-    char* buf = new char[len];
-    env->GetByteArrayRegion (array, 0, len, reinterpret_cast<jbyte*>(buf));
-    return buf;
-}
-
 /*
  Trie APIs
  */
@@ -43,16 +32,37 @@ extern "C" JNIEXPORT jlong JNICALL
 Java_com_crankycoder_marisa_Trie_mmapFile(JNIEnv *env,
                                           jclass,
                                           jlong handle,
-                                          jstring path)
+                                          jstring filePath)
 {
-   const char *nativeString = env->GetStringUTFChars(path, 0);
+    // TODO: release the string later
+    const char *cFilePath = env->GetStringUTFChars(filePath, 0);
+     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "mmap filepath = [%s]", cFilePath);
 
     marisa::Trie* _trie;
     _trie = (marisa::Trie*) handle;
-    _trie->mmap(nativeString);
+    _trie->mmap(cFilePath);
     return (jlong) _trie;
 }
 
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_crankycoder_marisa_Trie_load(JNIEnv *env,
+                                      jclass,
+                                      jlong handle,
+                                      jstring filePath)
+{
+    marisa::Trie* _trie;
+    _trie = (marisa::Trie*) handle;
+
+    // TODO: release the string later
+    const char *cFilePath = env->GetStringUTFChars(filePath, 0);
+
+     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "load filepath = [%s]", cFilePath);
+
+    _trie->load(cFilePath);
+
+
+}
 
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -94,8 +104,7 @@ Java_com_crankycoder_marisa_Agent_bSetQuery(JNIEnv *env,
     marisa::Agent* _agent;
     _agent = (marisa::Agent*) agentHandle;
 
-    // TODO: we need to free this char* array
-    char* b_prefix = as_char_array(env, jbyte_prefix);
+    char * b_prefix = (char *) env->GetByteArrayElements (jbyte_prefix, 0);
 
     _agent->set_query(b_prefix);
 

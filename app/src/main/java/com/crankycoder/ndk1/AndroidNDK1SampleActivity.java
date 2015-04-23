@@ -1,6 +1,7 @@
 package com.crankycoder.ndk1;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -8,8 +9,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import com.crankycoder.marisa.Agent;
-import com.crankycoder.marisa._Trie;
+import com.crankycoder.marisa.BytesTrie;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 
 public class AndroidNDK1SampleActivity extends ActionBarActivity {
@@ -22,19 +26,29 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                _Trie t = new _Trie();
-                Log.i("libmarisa", "Trie handle: " + t.handle);
-                t.dealloc();
 
-                Agent ag = new Agent();
-                ag.b_set_query("abcdef".getBytes());
-                ag.key();
-                Log.i("libmarisa", "Success fetching key from agent");
+                BytesTrie byteTrie = new BytesTrie();
+                File storeDir = new File(sdcardArchivePath());
+                Log.i("libmarisa", storeDir.getAbsolutePath() + " exists " + storeDir.exists());
+
+                File f = new File(sdcardArchivePath() +"/benchmark.bytes_trie");
+                Log.i("libmarisa", f.getAbsolutePath() + " exists " + f.exists());
+                byteTrie.load(f.getAbsolutePath());
+                Log.i("libmarisa", "BytesTrie is loaded!");
+
+                List<byte[]> barResult = byteTrie.get("bar");
+                if (barResult.size() == 1) {
+                    Log.i("libmarisa", "Fetching [bar] key gets: [" + new String(barResult.get(0)) + "]") ;
+                }
+
             }
         });
 
     }
 
+    public static String sdcardArchivePath() {
+        return Environment.getExternalStorageDirectory() + File.separator + "StumblerOffline";
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
