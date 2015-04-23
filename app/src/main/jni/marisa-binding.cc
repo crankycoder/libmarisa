@@ -76,7 +76,9 @@ Java_com_crankycoder_marisa_Trie_predictiveSearch(JNIEnv *env,
     _trie = (marisa::Trie*) handle;
     _agent = (marisa::Agent*) agentHandle;
 
-    return (jboolean) _trie->predictive_search(*_agent);
+    jboolean result = (jboolean) _trie->predictive_search(*_agent);
+
+    return result;
 }
 
 
@@ -98,14 +100,21 @@ Java_com_crankycoder_marisa_Agent_bSetQuery(JNIEnv *env,
                                             jlong agentHandle,
                                             jbyteArray jbyte_prefix)
 {
-    // This is a hack of set_query which hardcodes
-    // the 0xff byte pad at the end of the key so that
-    // we can query ByteTrie objects.
     marisa::Agent* _agent;
     _agent = (marisa::Agent*) agentHandle;
 
-    char * b_prefix = (char *) env->GetByteArrayElements (jbyte_prefix, 0);
+    int len = env->GetArrayLength(jbyte_prefix);
 
+    // This is properly showing a length of 4
+    __android_log_print(ANDROID_LOG_INFO, "libmarisa", "jbyte_prefix length: %d", len);
+
+
+    // TODO: i'm doing something wrong here. I need the char* strlen to be 4 which
+    // is 'bar' + 0xff.  The b_prefix strlen is showing up as *5* though.
+
+    char* b_prefix = (char *) env->GetByteArrayElements(jbyte_prefix, 0);
+     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix length: %d", strlen(b_prefix));
+     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix : [%s]", b_prefix);
     _agent->set_query(b_prefix);
 
     return (jlong) b_prefix;

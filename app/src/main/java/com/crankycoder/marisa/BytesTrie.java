@@ -4,6 +4,8 @@
 
 package com.crankycoder.marisa;
 
+import android.util.Log;
+
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -29,6 +31,8 @@ public class BytesTrie extends Trie {
 
     List<byte[]> b_get_value(byte[] byte_key) {
 
+        Log.i("libmarisa", "Raw key byte_key for b_get_value is : ["+new String(byte_key)+"]");
+
         byte _VALUE_SEPARATOR = (byte)0xff;
 
         LinkedList<byte[]> result = new LinkedList<byte[]>();
@@ -37,6 +41,14 @@ public class BytesTrie extends Trie {
         b_prefix[b_prefix.length-1] = _VALUE_SEPARATOR;
 
         Agent ag = new Agent();
+
+        Log.i("libmarisa", "Setting b_prefix to len: " + b_prefix.length);
+
+        Log.i("libmarisa", "Setting b_prefix[0] to: " + b_prefix[0]);
+        Log.i("libmarisa", "Setting b_prefix[1] to: " + b_prefix[1]);
+        Log.i("libmarisa", "Setting b_prefix[2] to: " + b_prefix[2]);
+        Log.i("libmarisa", "Setting b_prefix[3] to: " + b_prefix[3]);
+
 
         ag.b_set_query(b_prefix);
 

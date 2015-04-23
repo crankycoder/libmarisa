@@ -37,6 +37,9 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
                 Log.i("libmarisa", "BytesTrie is loaded!");
 
                 List<byte[]> barResult = byteTrie.get("bar");
+
+                Log.i("libmarisa", "Fetching [bar] key gets: ["+barResult.size()+"] results" );
+
                 if (barResult.size() == 1) {
                     Log.i("libmarisa", "Fetching [bar] key gets: [" + new String(barResult.get(0)) + "]") ;
                 }
