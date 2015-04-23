@@ -14,21 +14,33 @@ public class Agent {
         System.loadLibrary("marisa");
     }
 
-    private native long newAgent();
-    private native long getKeyHandle();
-    private native void bSetQuery(long handle, byte[] b_prefix);
-
     final long handle;
+    private long queryHandle = 0;
+
+    private native long newAgent();
+
+    private native long getKeyHandle();
+
+    private native long bSetQuery(long handle, byte[] b_prefix);
+    private native void freeCharStar(long queryHandle);
 
     public Agent() {
         handle = newAgent();
     }
 
     public void b_set_query(byte[] b_prefix) {
-        bSetQuery(handle, b_prefix);
+        queryHandle = bSetQuery(handle, b_prefix);
     }
 
     public Key key() {
         return new Key(getKeyHandle());
     }
+
+    // This must be called after the Agent is no longer used
+    public void dealloc() {
+        if (queryHandle != 0) {
+            freeCharStar(queryHandle);
+        }
+    }
+
 }

@@ -82,7 +82,7 @@ Java_com_crankycoder_marisa_Agent_newAgent(JNIEnv *env,
     return (jlong) _agent;
 }
 
-extern "C" JNIEXPORT void JNICALL
+extern "C" JNIEXPORT jlong JNICALL
 Java_com_crankycoder_marisa_Agent_bSetQuery(JNIEnv *env,
                                             jclass,
                                             jlong agentHandle,
@@ -98,7 +98,20 @@ Java_com_crankycoder_marisa_Agent_bSetQuery(JNIEnv *env,
     char* b_prefix = as_char_array(env, jbyte_prefix);
 
     _agent->set_query(b_prefix);
+
+    return (jlong) b_prefix;
 }
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_crankycoder_marisa_Agent_freeCharStar(JNIEnv *env,
+                                                  jclass,
+                                                  jlong queryHandle)
+{
+    char* b_prefix = (char *) queryHandle;
+    delete b_prefix;
+}
+
+
 
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_crankycoder_marisa_Agent_getKeyHandle(JNIEnv *env,
