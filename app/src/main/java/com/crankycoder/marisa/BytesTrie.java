@@ -44,10 +44,10 @@ public class BytesTrie extends Trie {
 
         Log.i("libmarisa", "Setting b_prefix to len: " + b_prefix.length);
 
-        Log.i("libmarisa", "Setting b_prefix[0] to: " + b_prefix[0]);
-        Log.i("libmarisa", "Setting b_prefix[1] to: " + b_prefix[1]);
-        Log.i("libmarisa", "Setting b_prefix[2] to: " + b_prefix[2]);
-        Log.i("libmarisa", "Setting b_prefix[3] to: " + b_prefix[3]);
+        Log.i("libmarisa", "Setting b_prefix[0] to: " + Integer.toHexString(b_prefix[0]));
+        Log.i("libmarisa", "Setting b_prefix[1] to: " + Integer.toHexString(b_prefix[1]));
+        Log.i("libmarisa", "Setting b_prefix[2] to: " + Integer.toHexString(b_prefix[2]));
+        Log.i("libmarisa", "Setting b_prefix[3] to: " + Integer.toHexString(b_prefix[3]));
 
 
         ag.b_set_query(b_prefix);
@@ -58,10 +58,9 @@ public class BytesTrie extends Trie {
 
 
         while (predictive_search(ag)) {
-
-            byte[] slice = ag.key().ptr();
-            byte[] subArray = Arrays.copyOfRange(slice, prefix_len, ag.key().length());
-            result.add(subArray);
+            Log.i("libmarisa", "predictiveSearch fetch key");
+            // TODO: the agent key/ptr walk is all screwed up
+            result.add("something".getBytes());
         }
 
         ag.dealloc();

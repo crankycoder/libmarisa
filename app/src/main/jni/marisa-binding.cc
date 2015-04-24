@@ -116,6 +116,11 @@ Java_com_crankycoder_marisa_Agent_bSetQuery(JNIEnv *env,
     b_prefix[textLength] = '\0';
 
      __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix length: %d", strlen(b_prefix));
+     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix[0]  %02x", b_prefix[0]);
+     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix[1]  %02x", b_prefix[1]);
+     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix[2]  %02x", b_prefix[2]);
+     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix[3]  %02x", b_prefix[3]);
+
     // __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix : [%s]", b_prefix);
     _agent->set_query(b_prefix);
 

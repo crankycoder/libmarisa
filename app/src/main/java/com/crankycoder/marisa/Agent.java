@@ -4,6 +4,8 @@
 
 package com.crankycoder.marisa;
 
+import android.util.Log;
+
 /*
  This is a minimal port of the Agent class
  */
@@ -38,6 +40,8 @@ public class Agent {
 
     // This must be called after the Agent is no longer used
     public void dealloc() {
+        Log.i("libmarisa", "dealloc Agent");
+
         if (queryHandle != 0) {
             freeCharStar(queryHandle);
         }

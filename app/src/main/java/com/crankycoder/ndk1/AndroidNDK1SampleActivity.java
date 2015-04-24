@@ -36,18 +36,25 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
                 byteTrie.load(f.getAbsolutePath());
                 Log.i("libmarisa", "BytesTrie is loaded!");
 
-                List<byte[]> barResult = byteTrie.get("bar");
+                tryFetch(byteTrie, "bar");
+                tryFetch(byteTrie, "foo");
+                tryFetch(byteTrie, "baz");
+            }
 
-                Log.i("libmarisa", "Fetching [bar] key gets: ["+barResult.size()+"] results" );
+            private void tryFetch(BytesTrie byteTrie, String k) {
+                List<byte[]> result = byteTrie.get(k);
 
-                if (barResult.size() == 1) {
-                    Log.i("libmarisa", "Fetching [bar] key gets: [" + new String(barResult.get(0)) + "]") ;
+                Log.i("libmarisa", "Fetching ["+k+"] key gets: ["+result.size()+"] results" );
+
+                if (result.size() == 1) {
+                    Log.i("libmarisa", "Fetching ["+k+"] key gets: [" + new String(result.get(0)) + "]") ;
                 }
-
             }
         });
 
     }
+
+
 
     public static String sdcardArchivePath() {
         return Environment.getExternalStorageDirectory() + File.separator + "StumblerOffline";
