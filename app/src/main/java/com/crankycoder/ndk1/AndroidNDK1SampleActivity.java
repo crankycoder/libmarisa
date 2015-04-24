@@ -33,12 +33,12 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
 
                 File f = new File(sdcardArchivePath() +"/benchmark.bytes_trie");
                 Log.i("libmarisa", f.getAbsolutePath() + " exists " + f.exists());
-                byteTrie.load(f.getAbsolutePath());
+                byteTrie.mmap(f.getAbsolutePath());
                 Log.i("libmarisa", "BytesTrie is loaded!");
 
                 tryFetch(byteTrie, "bar");
-                tryFetch(byteTrie, "foo");
-                tryFetch(byteTrie, "baz");
+//                tryFetch(byteTrie, "blahblah");
+
             }
 
             private void tryFetch(BytesTrie byteTrie, String k) {

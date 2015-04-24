@@ -8,6 +8,46 @@
  Trie APIs
  */
 
+extern "C" JNIEXPORT void JNICALL
+Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
+                                                jclass,
+                                                jlong handle,
+                                                jbyteArray jbyte_prefix)
+{
+    marisa::Trie* _trie;
+    _trie = (marisa::Trie*) handle;
+
+    int textLength = env->GetArrayLength(jbyte_prefix);
+    jboolean isCopy;
+    jbyte* a = env->GetByteArrayElements(jbyte_prefix, &isCopy);
+    char* b_prefix = new char[textLength + 1];
+    memcpy(b_prefix, a, textLength);
+    b_prefix[textLength] = '\0';
+
+    int prefix_len = strlen(b_prefix);
+
+    marisa::Agent* ag = new marisa::Agent();
+    ag->set_query(b_prefix);
+
+    int keyLength = ag->key().length();
+
+    __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "ag.key().length() after set_query: %d", keyLength);
+
+    while (_trie->predictive_search(*ag)) {
+        __android_log_print(ANDROID_LOG_INFO, "clibmarisa",
+                "Prefix len: %d", prefix_len);
+
+        keyLength = ag->key().length();
+        __android_log_print(ANDROID_LOG_INFO, "clibmarisa",
+                "ag.key().length() in predictive search loop: %d",
+                keyLength);
+
+
+    };
+
+
+}
+
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_crankycoder_marisa_Trie_newTrie(JNIEnv *env,
                                          jclass)
@@ -36,7 +76,7 @@ Java_com_crankycoder_marisa_Trie_mmapFile(JNIEnv *env,
 {
     // TODO: release the string later
     const char *cFilePath = env->GetStringUTFChars(filePath, 0);
-     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "mmap filepath = [%s]", cFilePath);
+     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "mmap filepath = [%s]", cFilePath);
 
     marisa::Trie* _trie;
     _trie = (marisa::Trie*) handle;
@@ -57,7 +97,7 @@ Java_com_crankycoder_marisa_Trie_load(JNIEnv *env,
     // TODO: release the string later
     const char *cFilePath = env->GetStringUTFChars(filePath, 0);
 
-     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "load filepath = [%s]", cFilePath);
+     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "load filepath = [%s]", cFilePath);
 
     _trie->load(cFilePath);
 
@@ -91,6 +131,7 @@ Java_com_crankycoder_marisa_Agent_newAgent(JNIEnv *env,
 {
     marisa::Agent* _agent;
     _agent = new marisa::Agent();
+
     return (jlong) _agent;
 }
 
@@ -106,83 +147,52 @@ Java_com_crankycoder_marisa_Agent_bSetQuery(JNIEnv *env,
     int textLength = env->GetArrayLength(jbyte_prefix);
 
     // This is properly showing a length of 4
-    __android_log_print(ANDROID_LOG_INFO, "libmarisa", "jbyte_prefix length: %d", textLength);
+    __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "jbyte_prefix length: %d", textLength);
 
 
+    // We need to do some jiggery pokery to convert the java byte array into a NULL terminated
+    // char* array.
     jboolean isCopy;
     jbyte* a = env->GetByteArrayElements(jbyte_prefix, &isCopy);
+    // TODO: free this memory later
     char* b_prefix = new char[textLength + 1];
     memcpy(b_prefix, a, textLength);
     b_prefix[textLength] = '\0';
 
-     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix length: %d", strlen(b_prefix));
-     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix[0]  %02x", b_prefix[0]);
-     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix[1]  %02x", b_prefix[1]);
-     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix[2]  %02x", b_prefix[2]);
-     __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix[3]  %02x", b_prefix[3]);
+     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "b_prefix strlen: %d", strlen(b_prefix));
+     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "b_prefix[0]  %02x", b_prefix[0]);
+     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "b_prefix[1]  %02x", b_prefix[1]);
+     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "b_prefix[2]  %02x", b_prefix[2]);
+     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "b_prefix[3]  %02x", b_prefix[3]);
 
-    // __android_log_print(ANDROID_LOG_INFO, "libmarisa", "b_prefix : [%s]", b_prefix);
+    // __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "b_prefix : [%s]", b_prefix);
     _agent->set_query(b_prefix);
 
     return (jlong) b_prefix;
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_com_crankycoder_marisa_Agent_freeCharStar(JNIEnv *env,
-                                                  jclass,
-                                                  jlong queryHandle)
-{
-    char* b_prefix = (char *) queryHandle;
-    delete b_prefix;
-}
 
 
-
-extern "C" JNIEXPORT jlong JNICALL
-Java_com_crankycoder_marisa_Agent_getKeyHandle(JNIEnv *env,
+extern "C" JNIEXPORT jint JNICALL
+Java_com_crankycoder_marisa_Agent_getKeyLength(JNIEnv *env,
                                             jclass,
                                             jlong agentHandle)
 {
     marisa::Agent* _agent;
     _agent = (marisa::Agent*) agentHandle;
 
-    return (jlong) &(_agent->key());
+    // This is coming back as 4, but I expect to see 13
+    int keyLen = _agent->key().length();
+    __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "c++ fetch agent->key().length() == %d", keyLen);
+
+    int n = 0;
+    const char* ptr = _agent->key().ptr();
+    return (jint) keyLen;
 }
 
 /*
  Key APIs
  */
 
- extern "C" JNIEXPORT jbyteArray JNICALL
- Java_com_crankycoder_marisa_Key_keyPtr(JNIEnv *env,
-                                             jclass,
-                                             jlong keyHandle)
- {
-
-     /* Extract the char* data and return it as a byte array */
-     marisa::Key* _key;
-     _key = (marisa::Key*) keyHandle;
-
-     const char* data =  _key->ptr();
-
-     int n = 0;
-     while (*data++) {
-        n++;
-     } if (n <= 0) return NULL;
-
-     jbyteArray arr = env->NewByteArray(n);
-     env->SetByteArrayRegion(arr, 0, n, (jbyte*)data);
-     return arr;
- }
-
- extern "C" JNIEXPORT jint JNICALL
-  Java_com_crankycoder_marisa_Key_keyLength(JNIEnv *env,
-                                              jclass,
-                                              jlong keyHandle)
-{
-    marisa::Key* _key;
-    _key = (marisa::Key*) keyHandle;
-    return (jint) _key->length();
-}
 
 

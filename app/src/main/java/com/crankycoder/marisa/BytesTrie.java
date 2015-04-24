@@ -13,6 +13,10 @@ import java.util.List;
 
 public class BytesTrie extends Trie {
 
+
+    private native void bGetValue(long handle, byte[] b_prefix);
+
+
     /*
      Return a list of payloads (as byte objects) for a given key.
      */
@@ -40,7 +44,6 @@ public class BytesTrie extends Trie {
         byte[] b_prefix = Arrays.copyOf(byte_key, byte_key.length+1);
         b_prefix[b_prefix.length-1] = _VALUE_SEPARATOR;
 
-        Agent ag = new Agent();
 
         Log.i("libmarisa", "Setting b_prefix to len: " + b_prefix.length);
 
@@ -48,22 +51,9 @@ public class BytesTrie extends Trie {
         Log.i("libmarisa", "Setting b_prefix[1] to: " + Integer.toHexString(b_prefix[1]));
         Log.i("libmarisa", "Setting b_prefix[2] to: " + Integer.toHexString(b_prefix[2]));
         Log.i("libmarisa", "Setting b_prefix[3] to: " + Integer.toHexString(b_prefix[3]));
+        
+        bGetValue(handle, b_prefix);
 
-
-        ag.b_set_query(b_prefix);
-
-        Log.i("libmarisa", "Agent query is set");
-
-        int prefix_len = b_prefix.length;
-
-
-        while (predictive_search(ag)) {
-            Log.i("libmarisa", "predictiveSearch fetch key");
-            // TODO: the agent key/ptr walk is all screwed up
-            result.add("something".getBytes());
-        }
-
-        ag.dealloc();
         return result;
     }
 
