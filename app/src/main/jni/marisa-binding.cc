@@ -59,7 +59,11 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
         jbyteArray jbuf = env->NewByteArray(buf_len);
         env->SetByteArrayRegion(jbuf, 0, buf_len, (jbyte*) buf);
 
-        env->CallVoidMethod(resultArrayList, ArrayList_add_id, jbuf);
+        // safe to delete the buffer now
+        delete buf;
+
+        env->CallBooleanMethod(resultArrayList, ArrayList_add_id, jbuf);
+
     }
 
 
@@ -137,79 +141,4 @@ Java_com_crankycoder_marisa_Trie_predictiveSearch(JNIEnv *env,
 
     return result;
 }
-
-
-/*
- Agent APIs
- */
-extern "C" JNIEXPORT jlong JNICALL
-Java_com_crankycoder_marisa_Agent_newAgent(JNIEnv *env,
-                                           jclass)
-{
-    marisa::Agent* _agent;
-    _agent = new marisa::Agent();
-
-    return (jlong) _agent;
-}
-
-extern "C" JNIEXPORT jlong JNICALL
-Java_com_crankycoder_marisa_Agent_bSetQuery(JNIEnv *env,
-                                            jclass,
-                                            jlong agentHandle,
-                                            jbyteArray jbyte_prefix)
-{
-    marisa::Agent* _agent;
-    _agent = (marisa::Agent*) agentHandle;
-
-    int textLength = env->GetArrayLength(jbyte_prefix);
-
-    // This is properly showing a length of 4
-    __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "jbyte_prefix length: %d", textLength);
-
-
-    // We need to do some jiggery pokery to convert the java byte array into a NULL terminated
-    // char* array.
-    jboolean isCopy;
-    jbyte* a = env->GetByteArrayElements(jbyte_prefix, &isCopy);
-    // TODO: free this memory later
-    char* b_prefix = new char[textLength + 1];
-    memcpy(b_prefix, a, textLength);
-    b_prefix[textLength] = '\0';
-
-     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "b_prefix strlen: %d", strlen(b_prefix));
-     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "b_prefix[0]  %02x", b_prefix[0]);
-     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "b_prefix[1]  %02x", b_prefix[1]);
-     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "b_prefix[2]  %02x", b_prefix[2]);
-     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "b_prefix[3]  %02x", b_prefix[3]);
-
-    // __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "b_prefix : [%s]", b_prefix);
-    _agent->set_query(b_prefix);
-
-    return (jlong) b_prefix;
-}
-
-
-
-extern "C" JNIEXPORT jint JNICALL
-Java_com_crankycoder_marisa_Agent_getKeyLength(JNIEnv *env,
-                                            jclass,
-                                            jlong agentHandle)
-{
-    marisa::Agent* _agent;
-    _agent = (marisa::Agent*) agentHandle;
-
-    // This is coming back as 4, but I expect to see 13
-    int keyLen = _agent->key().length();
-    __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "c++ fetch agent->key().length() == %d", keyLen);
-
-    int n = 0;
-    const char* ptr = _agent->key().ptr();
-    return (jint) keyLen;
-}
-
-/*
- Key APIs
- */
-
-
 

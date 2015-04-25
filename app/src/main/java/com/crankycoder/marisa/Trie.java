@@ -18,8 +18,7 @@ public class Trie {
     private native long newTrie();
     private native void deallocTrie(long handle);
     private native long mmapFile(long handle, String path);
-    private native boolean predictiveSearch(long handle,
-                                    long agentHandle);
+
 
 
     private native void load(long handle, String filePath);
@@ -49,11 +48,5 @@ public class Trie {
         load(handle, path);
     }
 
-
-    public boolean predictive_search(Agent ag) {
-        Log.i("libmarisa", "predictive search starting");
-
-        return predictiveSearch(handle, ag.handle);
-    }
 
 }
