@@ -42,6 +42,14 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
                 "ag.key().length() in predictive search loop: %d",
                 keyLength);
 
+        int buf_len = ag->key().length() - prefix_len;
+        char* buf = new char[buf_len+1];
+        memcpy(buf, ag->key().ptr()+prefix_len, buf_len);
+        buf[buf_len] = '\0';
+
+        __android_log_print(ANDROID_LOG_INFO, "clibmarisa",
+                        "Buffer value [%s]", buf);
+
 
     };
 
