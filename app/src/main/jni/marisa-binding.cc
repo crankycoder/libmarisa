@@ -30,8 +30,7 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
     marisa::Agent* ag = new marisa::Agent();
     ag->set_query(b_prefix);
 
-    int keyLength = ag->key().length();
-
+    //int keyLength = ag->key().length();
     //__android_log_print(ANDROID_LOG_INFO, "clibmarisa", "ag.key().length() after set_query: %d", keyLength);
 
     jclass ArrayList_class = env->GetObjectClass(resultArrayList);
@@ -43,11 +42,13 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
         //__android_log_print(ANDROID_LOG_INFO, "clibmarisa",
         //        "Prefix len: %d", prefix_len);
 
-        keyLength = ag->key().length();
+        // keyLength = ag->key().length();
         //__android_log_print(ANDROID_LOG_INFO, "clibmarisa",
         //        "ag.key().length() in predictive search loop: %d",
         //        keyLength);
 
+        // I have no idea why, but you seem to need to copy out the bytes
+        // into a char* buffer instead of just passing key().ptr() into SetByteArrayRegion
         int buf_len = ag->key().length() - prefix_len;
         char* buf = new char[buf_len+1];
         memcpy(buf, ag->key().ptr()+prefix_len, buf_len);
@@ -59,12 +60,13 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
         jbyteArray jbuf = env->NewByteArray(buf_len);
         env->SetByteArrayRegion(jbuf, 0, buf_len, (jbyte*) buf);
 
-        // safe to delete the buffer now
+        // safe to delete the char* buffer now
         delete buf;
 
         env->CallBooleanMethod(resultArrayList, ArrayList_add_id, jbuf);
     }
 
+    delete ag;
     delete b_prefix;
 }
 
