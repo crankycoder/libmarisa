@@ -37,8 +37,6 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
                 Log.i("libmarisa", "BytesTrie is loaded!");
 
                 tryFetch(byteTrie, "bar");
-                tryFetch(byteTrie, "foo");
-                tryFetch(byteTrie, "foobar");
 
 //                tryFetch(byteTrie, "blahblah");
 

@@ -12,7 +12,8 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
                                                 jclass,
                                                 jlong handle,
-                                                jbyteArray jbyte_prefix)
+                                                jbyteArray jbyte_prefix,
+                                                jobject resultArrayList)
 {
     marisa::Trie* _trie;
     _trie = (marisa::Trie*) handle;
@@ -33,6 +34,11 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
 
     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "ag.key().length() after set_query: %d", keyLength);
 
+    jclass ArrayList_class = env->GetObjectClass(resultArrayList);
+    jmethodID ArrayList_add_id = env->GetMethodID(ArrayList_class, "add", "(Ljava/lang/Object;)Z");
+    __android_log_print(ANDROID_LOG_INFO, "clibmarisa",
+                        "arraylist add methodID: %d", (int) ArrayList_add_id);
+
     while (_trie->predictive_search(*ag)) {
         __android_log_print(ANDROID_LOG_INFO, "clibmarisa",
                 "Prefix len: %d", prefix_len);
@@ -50,8 +56,11 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
         __android_log_print(ANDROID_LOG_INFO, "clibmarisa",
                         "Buffer value [%s]", buf);
 
+        jbyteArray jbuf = env->NewByteArray(buf_len);
+        env->SetByteArrayRegion(jbuf, 0, buf_len, (jbyte*) buf);
 
-    };
+        env->CallVoidMethod(resultArrayList, ArrayList_add_id, jbuf);
+    }
 
 
 }

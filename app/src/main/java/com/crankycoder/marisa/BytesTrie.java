@@ -7,6 +7,7 @@ package com.crankycoder.marisa;
 import android.util.Log;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
 public class BytesTrie extends Trie {
 
 
-    private native void bGetValue(long handle, byte[] b_prefix);
+    private native void bGetValue(long handle, byte[] b_prefix, ArrayList<byte[]> resultArrayList);
 
 
     /*
@@ -39,7 +40,7 @@ public class BytesTrie extends Trie {
 
         byte _VALUE_SEPARATOR = (byte)0xff;
 
-        LinkedList<byte[]> result = new LinkedList<byte[]>();
+        ArrayList<byte[]> result = new ArrayList<byte[]>();
 
         byte[] b_prefix = Arrays.copyOf(byte_key, byte_key.length+1);
         b_prefix[b_prefix.length-1] = _VALUE_SEPARATOR;
@@ -52,7 +53,7 @@ public class BytesTrie extends Trie {
         Log.i("libmarisa", "Setting b_prefix[2] to: " + Integer.toHexString(b_prefix[2]));
         Log.i("libmarisa", "Setting b_prefix[3] to: " + Integer.toHexString(b_prefix[3]));
         
-        bGetValue(handle, b_prefix);
+        bGetValue(handle, b_prefix, result);
 
         return result;
     }
