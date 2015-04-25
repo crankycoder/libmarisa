@@ -9,7 +9,6 @@ import android.util.Log;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 public class BytesTrie extends Trie {
@@ -35,26 +34,13 @@ public class BytesTrie extends Trie {
 
 
     List<byte[]> b_get_value(byte[] byte_key) {
-
-        Log.i("libmarisa", "Raw key byte_key for b_get_value is : ["+new String(byte_key)+"]");
-
         byte _VALUE_SEPARATOR = (byte)0xff;
-
         ArrayList<byte[]> result = new ArrayList<byte[]>();
-
         byte[] b_prefix = Arrays.copyOf(byte_key, byte_key.length+1);
         b_prefix[b_prefix.length-1] = _VALUE_SEPARATOR;
 
-
-        Log.i("libmarisa", "Setting b_prefix to len: " + b_prefix.length);
-
-        Log.i("libmarisa", "Setting b_prefix[0] to: " + Integer.toHexString(b_prefix[0]));
-        Log.i("libmarisa", "Setting b_prefix[1] to: " + Integer.toHexString(b_prefix[1]));
-        Log.i("libmarisa", "Setting b_prefix[2] to: " + Integer.toHexString(b_prefix[2]));
-        Log.i("libmarisa", "Setting b_prefix[3] to: " + Integer.toHexString(b_prefix[3]));
-        
+        // Note that bGetValue will mutate the contents of result
         bGetValue(handle, b_prefix, result);
-
         return result;
     }
 

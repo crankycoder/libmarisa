@@ -32,29 +32,29 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
 
     int keyLength = ag->key().length();
 
-    __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "ag.key().length() after set_query: %d", keyLength);
+    //__android_log_print(ANDROID_LOG_INFO, "clibmarisa", "ag.key().length() after set_query: %d", keyLength);
 
     jclass ArrayList_class = env->GetObjectClass(resultArrayList);
     jmethodID ArrayList_add_id = env->GetMethodID(ArrayList_class, "add", "(Ljava/lang/Object;)Z");
-    __android_log_print(ANDROID_LOG_INFO, "clibmarisa",
-                        "arraylist add methodID: %d", (int) ArrayList_add_id);
+    //__android_log_print(ANDROID_LOG_INFO, "clibmarisa",
+    //                    "arraylist add methodID: %d", (int) ArrayList_add_id);
 
     while (_trie->predictive_search(*ag)) {
-        __android_log_print(ANDROID_LOG_INFO, "clibmarisa",
-                "Prefix len: %d", prefix_len);
+        //__android_log_print(ANDROID_LOG_INFO, "clibmarisa",
+        //        "Prefix len: %d", prefix_len);
 
         keyLength = ag->key().length();
-        __android_log_print(ANDROID_LOG_INFO, "clibmarisa",
-                "ag.key().length() in predictive search loop: %d",
-                keyLength);
+        //__android_log_print(ANDROID_LOG_INFO, "clibmarisa",
+        //        "ag.key().length() in predictive search loop: %d",
+        //        keyLength);
 
         int buf_len = ag->key().length() - prefix_len;
         char* buf = new char[buf_len+1];
         memcpy(buf, ag->key().ptr()+prefix_len, buf_len);
         buf[buf_len] = '\0';
 
-        __android_log_print(ANDROID_LOG_INFO, "clibmarisa",
-                        "Buffer value [%s]", buf);
+        //__android_log_print(ANDROID_LOG_INFO, "clibmarisa",
+        //                "Buffer value [%s]", buf);
 
         jbyteArray jbuf = env->NewByteArray(buf_len);
         env->SetByteArrayRegion(jbuf, 0, buf_len, (jbyte*) buf);
@@ -63,10 +63,9 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
         delete buf;
 
         env->CallBooleanMethod(resultArrayList, ArrayList_add_id, jbuf);
-
     }
 
-
+    delete b_prefix;
 }
 
 extern "C" JNIEXPORT jlong JNICALL
@@ -97,7 +96,7 @@ Java_com_crankycoder_marisa_Trie_mmapFile(JNIEnv *env,
 {
     // TODO: release the string later
     const char *cFilePath = env->GetStringUTFChars(filePath, 0);
-     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "mmap filepath = [%s]", cFilePath);
+    //__android_log_print(ANDROID_LOG_INFO, "clibmarisa", "mmap filepath = [%s]", cFilePath);
 
     marisa::Trie* _trie;
     _trie = (marisa::Trie*) handle;
@@ -118,27 +117,9 @@ Java_com_crankycoder_marisa_Trie_load(JNIEnv *env,
     // TODO: release the string later
     const char *cFilePath = env->GetStringUTFChars(filePath, 0);
 
-     __android_log_print(ANDROID_LOG_INFO, "clibmarisa", "load filepath = [%s]", cFilePath);
+    //__android_log_print(ANDROID_LOG_INFO, "clibmarisa", "load filepath = [%s]", cFilePath);
 
     _trie->load(cFilePath);
 
 
 }
-
-
-extern "C" JNIEXPORT jboolean JNICALL
-Java_com_crankycoder_marisa_Trie_predictiveSearch(JNIEnv *env,
-                                                  jclass,
-                                                  jlong handle,
-                                                  jlong agentHandle)
-{
-    marisa::Trie* _trie;
-    marisa::Agent* _agent;
-    _trie = (marisa::Trie*) handle;
-    _agent = (marisa::Agent*) agentHandle;
-
-    jboolean result = (jboolean) _trie->predictive_search(*_agent);
-
-    return result;
-}
-

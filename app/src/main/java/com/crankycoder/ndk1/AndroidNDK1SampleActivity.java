@@ -29,12 +29,8 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
 
                 BytesTrie byteTrie = new BytesTrie();
                 File storeDir = new File(sdcardArchivePath());
-                Log.i("libmarisa", storeDir.getAbsolutePath() + " exists " + storeDir.exists());
-
                 File f = new File(sdcardArchivePath() +"/benchmark.bytes_trie");
-                Log.i("libmarisa", f.getAbsolutePath() + " exists " + f.exists());
                 byteTrie.mmap(f.getAbsolutePath());
-                Log.i("libmarisa", "BytesTrie is loaded!");
 
                 tryFetch(byteTrie, "bar");
 
@@ -46,7 +42,6 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
                 List<byte[]> result = byteTrie.get(k);
 
                 Log.i("libmarisa", "Fetching ["+k+"] key gets: ["+result.size()+"] results" );
-
                 if (result.size() == 1) {
                     Log.i("libmarisa", "Fetching ["+k+"] key gets: [" + new String(result.get(0)) + "]") ;
                 }

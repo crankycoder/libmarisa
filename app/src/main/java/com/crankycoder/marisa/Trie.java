@@ -1,12 +1,5 @@
 package com.crankycoder.marisa;
 
-import android.util.Log;
-
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.nio.charset.Charset;
-
 public class Trie {
 
     static {
