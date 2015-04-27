@@ -1,0 +1,18 @@
+language: android
+jdk: oraclejdk7
+
+android:
+    components:
+        - android-19
+        - build-tools-19.1.0
+        - extra-android-support
+    licenses:
+        - android-sdk-license-5be876d5
+
+before_install:
+    - if [ `uname -m` = x86_64]; then wget http://dl.google.com/android/ndk/android-ndk-r10d-linux-x86_64.bin -O ndk.bin; else wget http://dl.google.com/android/ndk/android-ndk-r10d-linux-x86.bin -O ndk.bin; fi
+    - chmod a+x ndk.bin
+    - ./ndk.bin -y | grep -v Extracting
+
+script:
+    - make
