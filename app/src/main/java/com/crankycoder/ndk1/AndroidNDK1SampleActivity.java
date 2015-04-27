@@ -10,10 +10,13 @@ import android.view.View;
 import android.widget.Button;
 
 import com.crankycoder.marisa.BytesTrie;
+import com.crankycoder.marisa.Record;
+import com.crankycoder.marisa.RecordTrie;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 public class AndroidNDK1SampleActivity extends ActionBarActivity {
@@ -27,24 +30,54 @@ public class AndroidNDK1SampleActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
 
-                BytesTrie byteTrie = new BytesTrie();
+                String fmt = "<" + new String(new char[100]).replace("\0", "i");
+                RecordTrie recordTrie = new RecordTrie(fmt);
                 File storeDir = new File(sdcardArchivePath());
-                File f = new File(sdcardArchivePath() +"/benchmark.bytes_trie");
-                byteTrie.mmap(f.getAbsolutePath());
+                File f = new File(sdcardArchivePath() +"/toronto.record_trie");
+                recordTrie.mmap(f.getAbsolutePath());
 
-                tryFetch(byteTrie, "bar");
+                String[] bssids = new String[]{"ccb255dd9fbe", "68b6fc3fbe19", "9094e439de3c"};
 
-//                tryFetch(byteTrie, "blahblah");
+                tryFetch(recordTrie, bssids);
 
             }
 
-            private void tryFetch(BytesTrie byteTrie, String k) {
-                List<byte[]> result = byteTrie.get(k);
+            private Set<Integer> tryFetch(RecordTrie rTrie, String[] bssids) {
+                Set<Integer> intersectedSet = null;
+                for (String k: bssids) {
+                    List<Record> curBatch = rTrie.getRecord(k);
+                    for (Record record: curBatch) {
+                        Set<Integer> tmp = new HashSet<Integer>();
+                        Log.i("libmarisa", "----- start matchset ----- ");
+                        for (int i = 0; i < record.size(); i++) {
+                            Integer v = record.getInt(i);
+                            tmp.add(v);
+                            Log.i("libmarisa", "Tile match: ["+v+"]");
+                        }
+                        Log.i("libmarisa", "----- end matchset ----- ");
 
-                Log.i("libmarisa", "Fetching ["+k+"] key gets: ["+result.size()+"] results" );
-                if (result.size() == 1) {
-                    Log.i("libmarisa", "Fetching ["+k+"] key gets: [" + new String(result.get(0)) + "]") ;
+                        if (intersectedSet == null) {
+                            intersectedSet = tmp;
+                        } else {
+                            intersectedSet.retainAll(tmp);
+                        }
+                    }
                 }
+
+                if (intersectedSet == null) {
+                    intersectedSet = new HashSet<Integer>();
+                }
+
+                String foundMsg = "";
+                for (Integer ik: intersectedSet) {
+                    if (foundMsg.equals("")) {
+                        foundMsg = ik.toString();
+                    } else {
+                        foundMsg += ", " + ik.toString();
+                    }
+                }
+                Log.i("libmarisa", "Found results: [" +  foundMsg + "]");
+                return intersectedSet;
             }
         });
 
