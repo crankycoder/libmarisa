@@ -4,7 +4,6 @@
 
 package com.crankycoder.marisa;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
@@ -65,6 +64,8 @@ public class RecordTrie extends BytesTrie {
         }
 
         for (; offset < struct_fmt.length(); offset++) {
+            // I'm super lazy and haven't implemented anything beyond signed
+            // byte and signed int.
             if (oneChar(struct_fmt, offset).equals("i")) {
                 result.putInt(buf.getInt());
             } else if (oneChar(struct_fmt, offset).equals("b")) {

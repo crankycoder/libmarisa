@@ -30,23 +30,10 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
     marisa::Agent* ag = new marisa::Agent();
     ag->set_query(b_prefix);
 
-    //int keyLength = ag->key().length();
-    //__android_log_print(ANDROID_LOG_INFO, "clibmarisa", "ag.key().length() after set_query: %d", keyLength);
-
     jclass ArrayList_class = env->GetObjectClass(resultArrayList);
     jmethodID ArrayList_add_id = env->GetMethodID(ArrayList_class, "add", "(Ljava/lang/Object;)Z");
-    //__android_log_print(ANDROID_LOG_INFO, "clibmarisa",
-    //                    "arraylist add methodID: %d", (int) ArrayList_add_id);
 
     while (_trie->predictive_search(*ag)) {
-        //__android_log_print(ANDROID_LOG_INFO, "clibmarisa",
-        //        "Prefix len: %d", prefix_len);
-
-        // keyLength = ag->key().length();
-        //__android_log_print(ANDROID_LOG_INFO, "clibmarisa",
-        //        "ag.key().length() in predictive search loop: %d",
-        //        keyLength);
-
         // I have no idea why, but you seem to need to copy out the bytes
         // into a char* buffer instead of just passing key().ptr() into SetByteArrayRegion
         int buf_len = ag->key().length() - prefix_len;
@@ -54,8 +41,6 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
         memcpy(buf, ag->key().ptr()+prefix_len, buf_len);
         buf[buf_len] = '\0';
 
-        //__android_log_print(ANDROID_LOG_INFO, "clibmarisa",
-        //                "Buffer value [%s]", buf);
 
         jbyteArray jbuf = env->NewByteArray(buf_len);
         env->SetByteArrayRegion(jbuf, 0, buf_len, (jbyte*) buf);
@@ -98,11 +83,11 @@ Java_com_crankycoder_marisa_Trie_mmapFile(JNIEnv *env,
 {
     // TODO: release the string later
     const char *cFilePath = env->GetStringUTFChars(filePath, 0);
-    //__android_log_print(ANDROID_LOG_INFO, "clibmarisa", "mmap filepath = [%s]", cFilePath);
 
     marisa::Trie* _trie;
     _trie = (marisa::Trie*) handle;
     _trie->mmap(cFilePath);
+    env->ReleaseStringUTFChars(filePath, cFilePath);
     return (jlong) _trie;
 }
 
@@ -116,12 +101,7 @@ Java_com_crankycoder_marisa_Trie_load(JNIEnv *env,
     marisa::Trie* _trie;
     _trie = (marisa::Trie*) handle;
 
-    // TODO: release the string later
     const char *cFilePath = env->GetStringUTFChars(filePath, 0);
-
-    //__android_log_print(ANDROID_LOG_INFO, "clibmarisa", "load filepath = [%s]", cFilePath);
-
     _trie->load(cFilePath);
-
-
+    env->ReleaseStringUTFChars(filePath, cFilePath);
 }

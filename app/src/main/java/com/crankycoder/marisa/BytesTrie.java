@@ -4,16 +4,12 @@
 
 package com.crankycoder.marisa;
 
-import android.util.Log;
-
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class BytesTrie extends Trie {
-
-
     private native void bGetValue(long handle, byte[] b_prefix, ArrayList<byte[]> resultArrayList);
 
 
