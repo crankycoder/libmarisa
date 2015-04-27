@@ -6,6 +6,8 @@
 build
 obj
 
+local.properties
+
 # ignore vim swap files
 *.sw?
 
