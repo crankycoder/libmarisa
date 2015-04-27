@@ -15,8 +15,7 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
                                                 jbyteArray jbyte_prefix,
                                                 jobject resultArrayList)
 {
-    marisa::Trie* _trie;
-    _trie = (marisa::Trie*) handle;
+    marisa::Trie* _trie = (marisa::Trie*) handle;
 
     int textLength = env->GetArrayLength(jbyte_prefix);
     jboolean isCopy;
@@ -27,18 +26,18 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
 
     int prefix_len = strlen(b_prefix);
 
-    marisa::Agent* ag = new marisa::Agent();
-    ag->set_query(b_prefix);
+    marisa::Agent ag;
+    ag.set_query(b_prefix);
 
     jclass ArrayList_class = env->GetObjectClass(resultArrayList);
     jmethodID ArrayList_add_id = env->GetMethodID(ArrayList_class, "add", "(Ljava/lang/Object;)Z");
 
-    while (_trie->predictive_search(*ag)) {
+    while (_trie->predictive_search(ag)) {
         // I have no idea why, but you seem to need to copy out the bytes
         // into a char* buffer instead of just passing key().ptr() into SetByteArrayRegion
-        int buf_len = ag->key().length() - prefix_len;
+        int buf_len = ag.key().length() - prefix_len;
         char* buf = new char[buf_len+1];
-        memcpy(buf, ag->key().ptr()+prefix_len, buf_len);
+        memcpy(buf, ag.key().ptr()+prefix_len, buf_len);
         buf[buf_len] = '\0';
 
 
@@ -51,7 +50,6 @@ Java_com_crankycoder_marisa_BytesTrie_bGetValue(JNIEnv *env,
         env->CallBooleanMethod(resultArrayList, ArrayList_add_id, jbuf);
     }
 
-    delete ag;
     delete b_prefix;
 }
 
