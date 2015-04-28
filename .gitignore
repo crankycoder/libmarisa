@@ -6,7 +6,11 @@
 build
 obj
 
+# Ignore local build properties
 local.properties
+
+# Ignore bintray password file
+bintray.properties
 
 # ignore vim swap files
 *.sw?
@@ -16,6 +20,9 @@ android/libs/*.jar
 
 # Ignore libraries built from C source
 app/src/main/libs
+
+# Ignore marisa libs
+libraries/marisa/src/main/libs
 
 # ctags
 tags

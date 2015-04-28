@@ -1,0 +1,182 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.+'
+        classpath 'com.github.jcandksolutions.gradle:android-unit-test:2.1.1'
+
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0'
+        classpath 'com.github.dcendents:android-maven-plugin:1.2'
+    }
+}
+
+apply plugin: 'android-sdk-manager'
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+version = "0.2"
+group = 'org.mozilla.mozstumbler.marisa'
+
+def siteUrl = 'https://github.com/crankycoder/libmarisa'
+def gitUrl = 'https://github.com/crankycoder/libmarisa.git'
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion "19.1.0"
+
+    sourceSets {
+        androidTest.setRoot('src/test')
+
+        main {
+            jni.srcDirs = [] // This prevents the auto generation of Android.mk
+            jniLibs.srcDir 'src/main/libs' // This is not necessary unless you have precompiled libraries in your project
+        }
+    }
+
+    defaultConfig {
+        minSdkVersion 10
+        targetSdkVersion 18
+    }
+
+    lintOptions {
+        disable 'MissingTranslation'
+        abortOnError false
+    }
+
+    task ndkBuild (type: Exec) { 
+        commandLine 'ndk-build', '-C', file('src/main').absolutePath
+    }
+
+    // You'll need to comment out this block to generate the initial
+    // JNI stubs with `make jni_stubs`.  Gradle doesn't have a javah
+    // task, and invoking apache ant's javah task is not obvious as
+    // obtaining the compile time classpath is crazy.
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn ndkBuild
+    }
+
+}
+
+Properties properties = new Properties()
+File bintrayFile = project.rootProject.file('bintray.properties')
+if (bintrayFile.exists()) {
+    properties.load(bintrayFile.newDataInputStream())
+} else {
+    properties = null
+}
+
+bintray {
+    if (properties != null) {
+        user = properties.getProperty("bintray.user")
+        key = properties.getProperty("bintray.apikey")
+    }
+    configurations = ['archives']
+    pkg {
+        repo = "libMozStumbler"
+        name = "libMozStumbler"
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["MPL-2.0"]
+        publish = true
+    }
+}
+
+
+apply plugin: 'android-unit-test'
+
+androidUnitTest {
+}
+
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                name 'A simple library to embed Mozilla Stumbler.'
+                url siteUrl
+                licenses {
+                    license {
+                        name 'Mozilla Public License, Version 2.0'
+                        url 'https://www.mozilla.org/MPL/2.0/'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'crankycoder'
+                        name 'Victor Ng'
+                        email 'victor@crankycoder.com'
+                    }
+                    developer {
+                        id 'garvankeeley'
+                        name 'Garvan Keeley'
+                        email 'garvankeeley@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    androidTestCompile 'junit:junit:4.10'
+    testCompile        'junit:junit:4.10'
+
+    androidTestCompile 'org.robolectric:robolectric:2.4'
+    testCompile        'org.robolectric:robolectric:2.4'
+
+    androidTestCompile "org.mockito:mockito-core:1.+"
+    testCompile        "org.mockito:mockito-core:1.+"
+
+    // https://developer.android.com/tools/support-library/features.html
+    // In general, we recommend including the v4 support and v7 appcompat
+    // libraries, because they support a wide range of Android versions and
+    // provide APIs for recommended user interface patterns.
+
+    compile "com.android.support:support-v4:21.0.+"
+    compile 'com.android.support:appcompat-v7:19.1.0'
+
+    // Acralyzer crash reports
+    compile('ch.acra:acra:4.5.0') {
+        exclude group: 'org.json'
+    }
+
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+task findConventions << {
+    println project.getConvention()
+}
