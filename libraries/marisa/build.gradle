@@ -71,8 +71,10 @@ Properties properties = new Properties()
 File bintrayFile = project.rootProject.file('bintray.properties')
 if (bintrayFile.exists()) {
     properties.load(bintrayFile.newDataInputStream())
+    println "Loaded bintray.properties" + properties
 } else {
     properties = null
+    println "No bintray.properties is loaded"
 }
 
 bintray {
@@ -82,8 +84,8 @@ bintray {
     }
     configurations = ['archives']
     pkg {
-        repo = "libMozStumbler"
-        name = "libMozStumbler"
+        repo = "libmarisa"
+        name = "libmarisa"
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["MPL-2.0"]
