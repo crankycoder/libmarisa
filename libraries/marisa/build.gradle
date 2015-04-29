@@ -24,7 +24,7 @@ allprojects {
     }
 }
 
-version = "0.2"
+version = "0.3"
 group = 'org.mozilla.mozstumbler.marisa'
 
 def siteUrl = 'https://github.com/crankycoder/libmarisa'
