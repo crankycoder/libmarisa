@@ -1,3 +1,7 @@
+[![Build
+Status](https://travis-ci.org/crankycoder/libmarisa.svg?branch=dev)](https://travis-ci.org/crankycoder/libmarisa)
+
+
 This is a port of the Python package 'marisa-trie'.
 
 Original Python code: https://github.com/kmike/marisa-trie
@@ -16,9 +20,25 @@ same C++ code.
 Installation
 ============
 
-::
+Use gradle!
 
-    TODO: add instructions for jcenter here
+Add the repository:
+
+```
+    maven { url "http://dl.bintray.com/crankycoder/libmarisa" }
+```
+
+Add the dependency:
+
+```
+    compile 'org.mozilla.mozstumbler.marisa:marisa:0.3'
+```
+
+And you're done!
+
+See the example in `app/build.gradle` for a fully working example.
+
+
 
 Usage
 =====
