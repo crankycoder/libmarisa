@@ -84,11 +84,11 @@ bintray {
     }
     configurations = ['archives']
     pkg {
-        repo = "libmarisa"
+        repo = "libMozStumbler"
         name = "libmarisa"
         websiteUrl = siteUrl
         vcsUrl = gitUrl
-        licenses = ["MPL-2.0"]
+        licenses = ["BSD 2-clause"]
         publish = true
     }
 }
