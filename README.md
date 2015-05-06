@@ -59,3 +59,14 @@ idiosyncratic bugs with lookups.
 
 
 Writing to a trie is not supported yet in this library.
+
+
+License
+=======
+
+C++ code is from https://github.com/kmike/marisa-trie and is licensed under the BSD 2-clause license.
+
+License text for C++ code can be found in LICENSE.c++.
+
+Java code is licensed under a BSD 2-clause license as well.  Java
+license can be found in LICENSE.java
