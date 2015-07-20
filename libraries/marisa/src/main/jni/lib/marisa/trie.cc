@@ -5,168 +5,204 @@
 
 namespace marisa {
 
-Trie::Trie() : trie_() {}
+    Trie::Trie() : trie_() {}
 
-Trie::~Trie() {}
+    Trie::~Trie() {}
 
-void Trie::build(Keyset &keyset, int config_flags) {
-  scoped_ptr<grimoire::LoudsTrie> temp(new (std::nothrow) grimoire::LoudsTrie);
-  MARISA_THROW_IF(temp.get() == NULL, MARISA_MEMORY_ERROR);
+    void Trie::build(Keyset &keyset, int config_flags) {
+        scoped_ptr<grimoire::LoudsTrie> temp(new (std::nothrow) grimoire::LoudsTrie);
+        MARISA_THROW_IF(temp.get() == NULL, MARISA_MEMORY_ERROR);
 
-  temp->build(keyset, config_flags);
-  trie_.swap(temp);
-}
+        temp->build(keyset, config_flags);
+        trie_.swap(temp);
+    }
 
-void Trie::mmap(const char *filename) {
-  MARISA_THROW_IF(filename == NULL, MARISA_NULL_ERROR);
+    void Trie::mmap(const char *filename) {
+        MARISA_THROW_IF(filename == NULL, MARISA_NULL_ERROR);
 
-  scoped_ptr<grimoire::LoudsTrie> temp(new (std::nothrow) grimoire::LoudsTrie);
-  MARISA_THROW_IF(temp.get() == NULL, MARISA_MEMORY_ERROR);
+        scoped_ptr<grimoire::LoudsTrie> temp(new (std::nothrow) grimoire::LoudsTrie);
+        MARISA_THROW_IF(temp.get() == NULL, MARISA_MEMORY_ERROR);
 
-  grimoire::Mapper mapper;
-  mapper.open(filename);
-  temp->map(mapper);
-  trie_.swap(temp);
-}
+        grimoire::Mapper mapper;
+        mapper.open(filename);
+        temp->map(mapper);
+        trie_.swap(temp);
+    }
 
-void Trie::map(const void *ptr, std::size_t size) {
-  MARISA_THROW_IF((ptr == NULL) && (size != 0), MARISA_NULL_ERROR);
+    void Trie::map(const void *ptr, std::size_t size) {
+        MARISA_THROW_IF((ptr == NULL) && (size != 0), MARISA_NULL_ERROR);
 
-  scoped_ptr<grimoire::LoudsTrie> temp(new (std::nothrow) grimoire::LoudsTrie);
-  MARISA_THROW_IF(temp.get() == NULL, MARISA_MEMORY_ERROR);
+        scoped_ptr<grimoire::LoudsTrie> temp(new (std::nothrow) grimoire::LoudsTrie);
+        MARISA_THROW_IF(temp.get() == NULL, MARISA_MEMORY_ERROR);
 
-  grimoire::Mapper mapper;
-  mapper.open(ptr, size);
-  temp->map(mapper);
-  trie_.swap(temp);
-}
+        grimoire::Mapper mapper;
+        mapper.open(ptr, size);
+        temp->map(mapper);
+        trie_.swap(temp);
+    }
 
-void Trie::load(const char *filename) {
-  MARISA_THROW_IF(filename == NULL, MARISA_NULL_ERROR);
+    void Trie::load(const char *filename) {
+        MARISA_THROW_IF(filename == NULL, MARISA_NULL_ERROR);
 
-  scoped_ptr<grimoire::LoudsTrie> temp(new (std::nothrow) grimoire::LoudsTrie);
-  MARISA_THROW_IF(temp.get() == NULL, MARISA_MEMORY_ERROR);
+        scoped_ptr<grimoire::LoudsTrie> temp(new (std::nothrow) grimoire::LoudsTrie);
+        MARISA_THROW_IF(temp.get() == NULL, MARISA_MEMORY_ERROR);
 
-  grimoire::Reader reader;
-  reader.open(filename);
-  temp->read(reader);
-  trie_.swap(temp);
-}
+        grimoire::Reader reader;
+        reader.open(filename);
+        temp->read(reader);
+        trie_.swap(temp);
+    }
 
-void Trie::read(int fd) {
-  MARISA_THROW_IF(fd == -1, MARISA_CODE_ERROR);
+    void Trie::read(int fd) {
+        MARISA_THROW_IF(fd == -1, MARISA_CODE_ERROR);
 
-  scoped_ptr<grimoire::LoudsTrie> temp(new (std::nothrow) grimoire::LoudsTrie);
-  MARISA_THROW_IF(temp.get() == NULL, MARISA_MEMORY_ERROR);
+        scoped_ptr<grimoire::LoudsTrie> temp(new (std::nothrow) grimoire::LoudsTrie);
+        MARISA_THROW_IF(temp.get() == NULL, MARISA_MEMORY_ERROR);
 
-  grimoire::Reader reader;
-  reader.open(fd);
-  temp->read(reader);
-  trie_.swap(temp);
-}
+        grimoire::Reader reader;
+        reader.open(fd);
+        temp->read(reader);
+        trie_.swap(temp);
+    }
 
-void Trie::save(const char *filename) const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  MARISA_THROW_IF(filename == NULL, MARISA_NULL_ERROR);
+    void Trie::save(const char *filename) const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        MARISA_THROW_IF(filename == NULL, MARISA_NULL_ERROR);
 
-  grimoire::Writer writer;
-  writer.open(filename);
-  trie_->write(writer);
-}
+        grimoire::Writer writer;
+        writer.open(filename);
+        trie_->write(writer);
+    }
 
-void Trie::write(int fd) const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  MARISA_THROW_IF(fd == -1, MARISA_CODE_ERROR);
+    void Trie::write(int fd) const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        MARISA_THROW_IF(fd == -1, MARISA_CODE_ERROR);
 
-  grimoire::Writer writer;
-  writer.open(fd);
-  trie_->write(writer);
-}
+        grimoire::Writer writer;
+        writer.open(fd);
+        trie_->write(writer);
+    }
 
-bool Trie::lookup(Agent &agent) const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  if (!agent.has_state()) {
-    agent.init_state();
-  }
-  return trie_->lookup(agent);
-}
+    bool Trie::lookup(Agent &agent) const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        if (!agent.has_state()) {
+            agent.init_state();
+        }
+        return trie_->lookup(agent);
+    }
 
-void Trie::reverse_lookup(Agent &agent) const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  if (!agent.has_state()) {
-    agent.init_state();
-  }
-  trie_->reverse_lookup(agent);
-}
+    void Trie::reverse_lookup(Agent &agent) const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        if (!agent.has_state()) {
+            agent.init_state();
+        }
+        trie_->reverse_lookup(agent);
+    }
 
-bool Trie::common_prefix_search(Agent &agent) const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  if (!agent.has_state()) {
-    agent.init_state();
-  }
-  return trie_->common_prefix_search(agent);
-}
+    bool Trie::common_prefix_search(Agent &agent) const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        if (!agent.has_state()) {
+            agent.init_state();
+        }
+        return trie_->common_prefix_search(agent);
+    }
 
-bool Trie::predictive_search(Agent &agent) const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  if (!agent.has_state()) {
-    agent.init_state();
-  }
-  return trie_->predictive_search(agent);
-}
+    bool Trie::predictive_search(Agent &agent) const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        if (!agent.has_state()) {
+            agent.init_state();
+        }
+        return trie_->predictive_search(agent);
+    }
 
-std::size_t Trie::num_tries() const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  return trie_->num_tries();
-}
+    std::size_t Trie::num_tries() const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        return trie_->num_tries();
+    }
 
-std::size_t Trie::num_keys() const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  return trie_->num_keys();
-}
+    std::size_t Trie::num_keys() const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        return trie_->num_keys();
+    }
 
-std::size_t Trie::num_nodes() const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  return trie_->num_nodes();
-}
+    std::size_t Trie::num_nodes() const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        return trie_->num_nodes();
+    }
 
-TailMode Trie::tail_mode() const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  return trie_->tail_mode();
-}
+    TailMode Trie::tail_mode() const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        return trie_->tail_mode();
+    }
 
-NodeOrder Trie::node_order() const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  return trie_->node_order();
-}
+    NodeOrder Trie::node_order() const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        return trie_->node_order();
+    }
 
-bool Trie::empty() const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  return trie_->empty();
-}
+    bool Trie::empty() const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        return trie_->empty();
+    }
 
-std::size_t Trie::size() const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  return trie_->size();
-}
+    std::size_t Trie::size() const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        return trie_->size();
+    }
 
-std::size_t Trie::total_size() const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  return trie_->total_size();
-}
+    std::size_t Trie::total_size() const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        return trie_->total_size();
+    }
 
-std::size_t Trie::io_size() const {
-  MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
-  return trie_->io_size();
-}
+    std::size_t Trie::io_size() const {
+        MARISA_THROW_IF(trie_.get() == NULL, MARISA_STATE_ERROR);
+        return trie_->io_size();
+    }
 
-void Trie::clear() {
-  Trie().swap(*this);
-}
+    void Trie::clear() {
+        Trie().swap(*this);
+    }
 
-void Trie::swap(Trie &rhs) {
-  trie_.swap(rhs.trie_);
-}
+    void Trie::swap(Trie &rhs) {
+        trie_.swap(rhs.trie_);
+    }
+
+    BytesTrie::BytesTrie() {
+        // fill in this constructor
+    }
+
+    /*
+     * Return a list of payloads (as byte objects) for a given key.
+     */
+    std::vector<std::string> BytesTrie::get(const char *b_prefix) {
+        // create a vector of strings
+        std::vector<std::string> result_strings;
+
+        size_t prefix_len = strlen(b_prefix);
+
+        marisa::Agent ag;
+        ag.set_query(b_prefix);
+
+        while (this->predictive_search(ag)) {
+            // I have no idea why, but you seem to need to copy out the bytes
+            // into a char* buffer instead of just passing key().ptr() into SetByteArrayRegion
+            int buf_len = ag.key().length() - prefix_len;
+            assert (buf_len > -1);
+
+            char* buf = new char[buf_len+1];
+            memcpy(buf, ag.key().ptr()+prefix_len, buf_len);
+            buf[buf_len] = '\0';
+
+            result_strings.push_back(buf);
+
+            // safe to delete the char* buffer now
+            delete buf;
+        }
+        return result_strings;
+    }
+
+
 
 }  // namespace marisa
 

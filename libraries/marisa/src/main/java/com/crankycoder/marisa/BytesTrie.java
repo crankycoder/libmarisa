@@ -17,7 +17,8 @@ public class BytesTrie extends Trie {
      Return a list of payloads (as byte objects) for a given key.
      */
     public List<byte[]> get(String key) {
-        return b_get_value(key.getBytes(Charset.forName("UTF-8")));
+        byte[] utf8_bytes = key.getBytes(Charset.forName("UTF-8"));
+        return b_get_value(utf8_bytes);
     }
 
 

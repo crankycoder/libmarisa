@@ -1,6 +1,3 @@
-# A simple test for the minimal standard C++ library
-#
-
 LOCAL_PATH := $(call my-dir)
 LOCAL_CPP_FEATURES := exceptions rtti
 
