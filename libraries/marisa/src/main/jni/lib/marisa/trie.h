@@ -65,7 +65,7 @@ namespace marisa {
     class BytesTrie: public Trie {
         public:
             BytesTrie();
-            std::vector<std::string> get(const char* b_prefix);
+            void get(std::vector<std::string> *result, const char* b_prefix);
     };
 
 }  // namespace marisa

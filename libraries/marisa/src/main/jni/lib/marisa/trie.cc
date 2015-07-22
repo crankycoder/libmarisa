@@ -175,9 +175,14 @@ namespace marisa {
     /*
      * Return a list of payloads (as byte objects) for a given key.
      */
-    std::vector<std::string> BytesTrie::get(const char *b_prefix) {
-        // create a vector of strings
-        std::vector<std::string> result_strings;
+    void BytesTrie::get(std::vector<std::string> *results, const char *prefix) {
+
+        // allocate a new buffer
+        int b_prefix_len = strlen(prefix)+2;
+        char *b_prefix = new char[b_prefix_len];
+        strcpy(b_prefix, prefix);
+        b_prefix[b_prefix_len-2] = 0xff; // Default value separator
+        b_prefix[b_prefix_len-1] = 0x00; // Default value separator
 
         size_t prefix_len = strlen(b_prefix);
 
@@ -185,21 +190,8 @@ namespace marisa {
         ag.set_query(b_prefix);
 
         while (this->predictive_search(ag)) {
-            // I have no idea why, but you seem to need to copy out the bytes
-            // into a char* buffer instead of just passing key().ptr() into SetByteArrayRegion
-            int buf_len = ag.key().length() - prefix_len;
-            assert (buf_len > -1);
-
-            char* buf = new char[buf_len+1];
-            memcpy(buf, ag.key().ptr()+prefix_len, buf_len);
-            buf[buf_len] = '\0';
-
-            result_strings.push_back(buf);
-
-            // safe to delete the char* buffer now
-            delete buf;
+            results->push_back(ag.key().ptr()+b_prefix_len-1);
         }
-        return result_strings;
     }
 
 

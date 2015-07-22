@@ -1,4 +1,4 @@
-from marisa_trie import RecordTrie
+from marisa_trie import RecordTrie, BytesTrie
 
 def test_load():
     keys = [u'foo', u'bar', u'foobar', u'foo']
@@ -9,5 +9,13 @@ def test_load():
     for k in keys:
         print rtrie.get(k)
 
+def test_bytestrie():
+    btrie = BytesTrie()
+    btrie.mmap('tests/simple.bytestrie')
+    print 'start bytes trie-------'
+    print btrie.get('foo')
+    print 'end bytes trie-------'
+
 if __name__ == '__main__':
     test_load()
+    test_bytestrie()
