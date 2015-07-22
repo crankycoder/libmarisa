@@ -1,7 +1,11 @@
 #include "lib/marisa/trie.h"
+
+#include <iostream>
 #include <memory.h>
 #include <assert.h>
 #include <stdio.h>
+
+using namespace std;
 
 void Record_Trie_load(marisa::Trie* _trie, const char* cFilePath)
 {
@@ -37,13 +41,13 @@ void test_bytestrie() {
     printf("BytesTrie is loaded at %p\n", _bytestrie);
     printf("BytesTrie has %d keys\n", _bytestrie->num_keys());
 
-    std::vector<std::string> results;
+    vector<string> results;
     printf("Searching foo\n");
     _bytestrie->get(&results, "foo");
 
     printf("%d results\n", results.size());
-    for(std::vector<std::string>::const_iterator i = results.begin(); i != results.end(); ++i) {
-        printf("[%s]\n", i->c_str());
+    for(vector<string>::const_iterator i = results.begin(); i != results.end(); i++) {
+        cout << "{" << *i << "}" << endl;
     }
     footer();
 
