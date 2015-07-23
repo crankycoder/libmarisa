@@ -1,13 +1,15 @@
 from marisa_trie import RecordTrie, BytesTrie
 
+
 def test_load():
-    keys = [u'foo', u'bar', u'foobar', u'foo']
-    expected_values = [(1, 2), (2, 1), (3, 3), (2, 1)]
-    fmt = "<HH"
+    keys = [u'foo', u'bar']
+    expected_values = [(1, 2, 3), (4, 5, 6)]
+    fmt = ">iii"
     rtrie = RecordTrie(fmt)
-    rtrie.load('tests/foobar.rtrie')
-    for k in keys:
-        print rtrie.get(k)
+    rtrie.load('tests/demo.record_trie')
+    for i, k in enumerate(keys):
+        assert [expected_values[i]] == rtrie.get(k)
+
 
 def test_bytestrie():
     btrie = BytesTrie()
