@@ -175,8 +175,7 @@ namespace marisa {
     /*
      * Return a list of payloads (as byte objects) for a given key.
      */
-    void BytesTrie::get(std::vector<std::string> *results, const char *prefix) {
-
+    void BytesTrie::get(std::vector< std::vector<char> > *results, const char *prefix) {
         // allocate a new buffer
         int b_prefix_len = strlen(prefix)+2;
         char *b_prefix = new char[b_prefix_len];
@@ -190,8 +189,21 @@ namespace marisa {
         ag.set_query(b_prefix);
 
         while (this->predictive_search(ag)) {
-            results->push_back(ag.key().ptr()+b_prefix_len-1);
+            // we need to copy the char* into a vector<char> to store
+            // a byte array
+            const char *tmp = ag.key().ptr()+b_prefix_len-1;
+            std::vector<char> byte_array(tmp, tmp+strlen(tmp));
+            results->push_back(byte_array);
         }
+        delete b_prefix;
+    }
+
+    RecordTrie::RecordTrie(const char *fmt) {
+        _fmt.assign(fmt, strlen(fmt));
+    }
+
+    void RecordTrie::getRecord(std::vector<marisa::Record> *result, const char* b_prefix) {
+        // TODO:
     }
 
 

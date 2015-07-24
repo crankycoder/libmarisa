@@ -41,13 +41,34 @@ void test_bytestrie() {
     printf("BytesTrie is loaded at %p\n", _bytestrie);
     printf("BytesTrie has %d keys\n", _bytestrie->num_keys());
 
-    vector<string> results;
+    vector< vector<char> > results;
     printf("Searching foo\n");
     _bytestrie->get(&results, "foo");
 
     printf("%d results\n", results.size());
-    for(vector<string>::const_iterator i = results.begin(); i != results.end(); i++) {
-        cout << "{" << *i << "}" << endl;
+    for(vector< vector<char> >::const_iterator i = results.begin(); i != results.end(); i++) {
+        const char* byteData = i->data();
+        cout << "{" << byteData << "}" << endl;
+    }
+    footer();
+
+}
+
+void test_recordtrie() {
+    header("RecordTrie");
+
+    marisa::RecordTrie* _rtrie = new marisa::RecordTrie(">iii");
+    _rtrie->mmap("tests/demo.record_trie");
+    printf("RecordTrie is loaded at %p\n", _rtrie);
+    printf("RecordTrie has %d keys\n", _rtrie->num_keys());
+
+    vector<marisa::Record> results;
+    printf("Searching foo\n");
+    _rtrie->getRecord(&results, "foo");
+
+    printf("%d results\n", results.size());
+    for(vector<marisa::Record>::const_iterator i = results.begin(); i != results.end(); i++) {
+        cout << "Found a result!" << endl;
     }
     footer();
 
@@ -56,5 +77,6 @@ void test_bytestrie() {
 int main() {
     test_trie();
     test_bytestrie();
+    test_recordtrie();
     return 0;
 }
