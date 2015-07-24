@@ -178,7 +178,7 @@ namespace marisa {
     void BytesTrie::get(std::vector< std::vector<char> > *results, const char *prefix) {
         // allocate a new buffer
         int b_prefix_len = strlen(prefix)+2;
-        char *b_prefix = new char[b_prefix_len];
+        char b_prefix[b_prefix_len];
         strcpy(b_prefix, prefix);
         b_prefix[b_prefix_len-2] = 0xff; // Default value separator
         b_prefix[b_prefix_len-1] = 0x00; // Default value separator
@@ -195,7 +195,6 @@ namespace marisa {
             std::vector<char> byte_array(tmp, tmp+strlen(tmp));
             results->push_back(byte_array);
         }
-        delete b_prefix;
     }
 
     RecordTrie::RecordTrie(const char *fmt) {
