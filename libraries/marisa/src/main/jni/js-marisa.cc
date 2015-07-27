@@ -43,7 +43,7 @@ void test_bytestrie() {
 
     vector< vector<char> > results;
     printf("Searching foo\n");
-    _bytestrie->get(&results, "foo");
+    _bytestrie->get(&results, "foo", 0);
 
     printf("%d results\n", results.size());
     for(vector< vector<char> >::const_iterator i = results.begin(); i != results.end(); i++) {
@@ -58,8 +58,9 @@ void test_recordtrie() {
     header("RecordTrie");
 
     marisa::RecordTrie* _rtrie = new marisa::RecordTrie(">iii");
+    printf("RecordTrie instantiated!\n");
     _rtrie->mmap("tests/demo.record_trie");
-    printf("RecordTrie is loaded at %p\n", _rtrie);
+    printf("RecordTrie is memory mapped\n");
     printf("RecordTrie has %d keys\n", _rtrie->num_keys());
 
     vector<marisa::Record> results;

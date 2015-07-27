@@ -65,7 +65,7 @@ namespace marisa {
     class BytesTrie: public Trie {
         public:
             BytesTrie();
-            void get(std::vector< std::vector<char> > *result, const char* b_prefix);
+            void get(std::vector< std::vector<char> > *result, const char* b_prefix, int bytes_to_read);
     };
 
     class Record {

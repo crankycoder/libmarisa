@@ -9,6 +9,7 @@ def test_load():
     rtrie.load('tests/demo.record_trie')
     for i, k in enumerate(keys):
         assert [expected_values[i]] == rtrie.get(k)
+        print "Got: %s" % (rtrie.get(k))
 
 
 def test_bytestrie():
