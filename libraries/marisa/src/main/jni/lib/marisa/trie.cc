@@ -198,7 +198,7 @@ namespace marisa {
         marisa::Agent ag;
         ag.set_query(b_prefix);
 
-        while (this->predictive_search(ag)) {
+        while (predictive_search(ag)) {
             // we need to copy the char* into a vector<char> to store
             // a byte array
             const char *tmp = ag.key().ptr()+b_prefix_len-1;
@@ -215,11 +215,11 @@ namespace marisa {
     void RecordTrie::_initFmtLength() {
         int offset = 0;
         bool hasOrdering = false;
-        if (_fmt.substr(0, 1) == "<") {
+        if (_fmt.at(0) == '<') {
             hasOrdering = true;
-        } else if ((_fmt.substr(0, 1) == ">") || (_fmt.substr(0, 1) == "!")) {
+        } else if ((_fmt.at(0) == '>') || (_fmt.at(0) == '!')) {
             hasOrdering = true;
-        } else if ((_fmt.substr(0, 1) == "@") || (_fmt.substr(0, 1) == "=")) {
+        } else if ((_fmt.at(0) == '@') || (_fmt.at(0) == '=')) {
             hasOrdering = true;
         }
 
@@ -230,8 +230,6 @@ namespace marisa {
         for (; offset < _fmt.length(); offset++) {
             if (_fmt.at(offset) == 'i') {
                 _fmtByteLength += 4;
-            } else if (_fmt.at(offset) == 'b') {
-                _fmtByteLength += 1;
             } else {
                 throw std::runtime_error(std::string("Invalid or unsupported format"));
             }
@@ -242,7 +240,7 @@ namespace marisa {
         _fmtByteLength = 0;
         _fmt.assign(fmt, strlen(fmt));
 
-        this->_initFmtLength();
+        _initFmtLength();
     }
 
     void RecordTrie::getRecord(std::vector<marisa::Record> *result, const char* b_prefix) {
@@ -254,15 +252,15 @@ namespace marisa {
 
         // Grab the byte dump for this kye
         
-        this->get(&tmpResult, b_prefix, _fmtByteLength);
+        get(&tmpResult, b_prefix, _fmtByteLength);
 
-        if (_fmt.substr(0, 1) == "<") {
+        if (_fmt.at(0) == '<') {
             encodingChar = '<';
             hasOrdering = true;
-        } else if ((_fmt.substr(0, 1) == ">") || (_fmt.substr(0, 1) == "!")) {
+        } else if ((_fmt.at(0) == '>') || (_fmt.at(0) == '!')) {
             encodingChar = '>';
             hasOrdering = true;
-        } else if ((_fmt.substr(0, 1) == "@") || (_fmt.substr(0, 1) == "=")) {
+        } else if ((_fmt.at(0) == '@') || (_fmt.at(0) == '=')) {
             encodingChar = '@';
             hasOrdering = true;
         }
@@ -288,10 +286,6 @@ namespace marisa {
                     rec.int_vector.push_back(tmpInt);
 
                     byte_offset += 4;
-                } else if (_fmt.at(offset) == 'b') {
-                    int8_t tmpByte;
-                    memcpy(&tmpByte, &bytes[byte_offset], 1);
-                    rec.byte_vector.push_back(tmpByte);
                 } else {
                     throw std::runtime_error(std::string("Invalid or unsupported format"));
                 }
@@ -304,11 +298,11 @@ namespace marisa {
 
     void Record::printTuple() {
         printf("Got Tuple: (");
-        for (int idx = 0; idx < this->int_vector.size(); idx++) {
+        for (int idx = 0; idx < int_vector.size(); idx++) {
             if (idx > 0) {
                 printf(", ");
             }
-            printf("%d", this->int_vector.at(idx));
+            printf("%d", int_vector.at(idx));
         }
         printf(")\n");
     }
