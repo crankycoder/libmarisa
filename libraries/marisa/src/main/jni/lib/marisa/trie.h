@@ -75,7 +75,6 @@ namespace marisa {
             void printTuple();
 
             std::vector<int> int_vector;
-            std::vector<char> byte_vector;
     };
 
     class RecordTrie: public BytesTrie {
