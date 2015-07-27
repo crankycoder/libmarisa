@@ -217,14 +217,18 @@ namespace marisa {
         bool hasOrdering = false;
         if (_fmt.at(0) == '<') {
             hasOrdering = true;
+            throw std::runtime_error(std::string("Little endian byte ordering is not supported"));
         } else if ((_fmt.at(0) == '>') || (_fmt.at(0) == '!')) {
             hasOrdering = true;
         } else if ((_fmt.at(0) == '@') || (_fmt.at(0) == '=')) {
             hasOrdering = true;
+            throw std::runtime_error(std::string("Native byte ordering is not supported"));
         }
 
         if (hasOrdering) {
             offset += 1;
+        } else {
+            throw std::runtime_error(std::string("Only explicit big endian data is supported"));
         }
 
         for (; offset < _fmt.length(); offset++) {
@@ -257,16 +261,20 @@ namespace marisa {
         if (_fmt.at(0) == '<') {
             encodingChar = '<';
             hasOrdering = true;
+            throw std::runtime_error(std::string("Little endian ordering are not supported"));
         } else if ((_fmt.at(0) == '>') || (_fmt.at(0) == '!')) {
             encodingChar = '>';
             hasOrdering = true;
         } else if ((_fmt.at(0) == '@') || (_fmt.at(0) == '=')) {
             encodingChar = '@';
             hasOrdering = true;
+            throw std::runtime_error(std::string("Native byte ordering is not supported"));
         }
 
         if (hasOrdering) {
             offset += 1;
+        } else {
+            throw std::runtime_error(std::string("Only explicit big endian data is supported"));
         }
 
 
@@ -280,7 +288,7 @@ namespace marisa {
             // Ok, each of the vector<char> buffers must be decoded.
             for (; offset < _fmt.length(); offset++) {
                 if (_fmt.at(offset) == 'i') {
-                    rec.int_vector.push_back(ntohl(*(int32_t*)(&bytes[byte_offset]))));
+                    rec.int_vector.push_back(ntohl(*(int32_t*)(&bytes[byte_offset])));
                     byte_offset += 4;
                 } else {
                     throw std::runtime_error(std::string("Invalid or unsupported format"));
