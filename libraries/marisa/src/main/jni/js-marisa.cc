@@ -62,16 +62,25 @@ void test_recordtrie() {
     printf("RecordTrie has %d keys\n", _rtrie->num_keys());
 
     vector<marisa::Record> results;
-    printf("Searching foo\n");
-    _rtrie->getRecord(&results, "foo");
+
+    char* key = "foo";
+    printf("Searching %s\n", key);
+    _rtrie->getRecord(&results, key);
 
     for(vector<marisa::Record>::const_iterator i = results.begin(); i != results.end(); i++) {
         marisa::Record rec = *i;
         rec.printTuple();
+    }
+    results.clear();
 
+    key = "bar";
+    printf("Searching %s\n", key);
+    _rtrie->getRecord(&results, key);
+    for(vector<marisa::Record>::const_iterator i = results.begin(); i != results.end(); i++) {
+        marisa::Record rec = *i;
+        rec.printTuple();
     }
     footer();
-
 }
 
 int main() {
