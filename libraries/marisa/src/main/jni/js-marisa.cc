@@ -58,18 +58,17 @@ void test_recordtrie() {
     header("RecordTrie");
 
     marisa::RecordTrie* _rtrie = new marisa::RecordTrie(">iii");
-    printf("RecordTrie instantiated!\n");
     _rtrie->mmap("tests/demo.record_trie");
-    printf("RecordTrie is memory mapped\n");
     printf("RecordTrie has %d keys\n", _rtrie->num_keys());
 
     vector<marisa::Record> results;
     printf("Searching foo\n");
     _rtrie->getRecord(&results, "foo");
 
-    printf("%d results\n", results.size());
     for(vector<marisa::Record>::const_iterator i = results.begin(); i != results.end(); i++) {
-        cout << "Found a result!" << endl;
+        marisa::Record rec = *i;
+        rec.printTuple();
+
     }
     footer();
 

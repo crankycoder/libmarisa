@@ -66,12 +66,14 @@ namespace marisa {
         public:
             BytesTrie();
             void get(std::vector< std::vector<char> > *result, const char* b_prefix, int bytes_to_read);
+            void printbuf(const char* buffer, int len);
     };
 
     class Record {
         public:
             Record();
-        private:
+            void printTuple();
+
             std::vector<int> int_vector;
             std::vector<char> byte_vector;
     };
@@ -82,6 +84,9 @@ namespace marisa {
             void getRecord(std::vector<Record> *result, const char* b_prefix);
         private:
             std::string _fmt;
+            int _fmtByteLength;
+
+            void _initFmtLength();
     };
 
 

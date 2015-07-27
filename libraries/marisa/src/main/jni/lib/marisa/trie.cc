@@ -174,6 +174,12 @@ namespace marisa {
     }
 
 
+    void BytesTrie::printbuf(const char* buffer, int len) {
+        for (int i = 0; i < len; ++i) {
+            printf("0x%02d ", int(buffer[i]));
+        }
+    }
+
     /*
      * Return a list of payloads (as byte objects) for a given key.
      */
@@ -202,22 +208,41 @@ namespace marisa {
                 bytes_to_read = strlen(tmp);
             }
             std::vector<char> byte_array(tmp, tmp+bytes_to_read);
-            printf("Pushing %d bytes into byte array\n", bytes_to_read);
-            for (int i = 0; i < bytes_to_read; i++) {
-                printf("[0x%02d], ", int(byte_array.at(i)));
-            }
-            printf("\n");
             results->push_back(byte_array);
         }
     }
 
-    void printbuf(const char* buffer, int len) {
-        for (int i = 0; i < len; ++i)
-            printf("%c", buffer[i]);
+    void RecordTrie::_initFmtLength() {
+        int offset = 0;
+        bool hasOrdering = false;
+        if (_fmt.substr(0, 1) == "<") {
+            hasOrdering = true;
+        } else if ((_fmt.substr(0, 1) == ">") || (_fmt.substr(0, 1) == "!")) {
+            hasOrdering = true;
+        } else if ((_fmt.substr(0, 1) == "@") || (_fmt.substr(0, 1) == "=")) {
+            hasOrdering = true;
+        }
+
+        if (hasOrdering) {
+            offset += 1;
+        }
+
+        for (; offset < _fmt.length(); offset++) {
+            if (_fmt.at(offset) == 'i') {
+                _fmtByteLength += 4;
+            } else if (_fmt.at(offset) == 'b') {
+                _fmtByteLength += 1;
+            } else {
+                throw std::runtime_error(std::string("Invalid or unsupported format"));
+            }
+        }
     }
 
     RecordTrie::RecordTrie(const char *fmt) {
+        _fmtByteLength = 0;
         _fmt.assign(fmt, strlen(fmt));
+
+        this->_initFmtLength();
     }
 
     void RecordTrie::getRecord(std::vector<marisa::Record> *result, const char* b_prefix) {
@@ -229,8 +254,7 @@ namespace marisa {
 
         // Grab the byte dump for this kye
         
-        // TODO: use the _fmt byte length here
-        this->get(&tmpResult, b_prefix, 12);
+        this->get(&tmpResult, b_prefix, _fmtByteLength);
 
         if (_fmt.substr(0, 1) == "<") {
             encodingChar = '<';
@@ -246,39 +270,48 @@ namespace marisa {
         if (hasOrdering) {
             offset += 1;
         }
-        std::cout << "Offset: " << offset << std::endl;
-        if (offset == 1) {
-            std::cout << "Encoding Char: " << encodingChar << std::endl;
-        }
 
-
-        std::cout << "tmpResult length: " << tmpResult.size() << std::endl;
 
         for(int idx = 0; idx < tmpResult.size(); idx++) {
-            std::cout << "Processing result " << idx << std::endl;
+            Record rec;
             const std::vector<char> byteArray = tmpResult.at(idx);
 
             const char* bytes = byteArray.data();
-            printf("Reading %d bytes [%s]\n", byteArray.size(), bytes);
 
             int byte_offset = 0;
             // Ok, each of the vector<char> buffers must be decoded.
             for (; offset < _fmt.length(); offset++) {
-                printf("Character: %c\n", _fmt.at(offset));
                 if (_fmt.at(offset) == 'i') {
-                    printf("Decoding int\n");
+                    int32_t tmpInt;
+                    memcpy(&tmpInt, &bytes[byte_offset], sizeof(tmpInt));
+                    tmpInt = ntohl(tmpInt);
+                    rec.int_vector.push_back(tmpInt);
+
+                    byte_offset += 4;
                 } else if (_fmt.at(offset) == 'b') {
-                    printf("Decoding byte\n");
+                    int8_t tmpByte;
+                    memcpy(&tmpByte, &bytes[byte_offset], 1);
+                    rec.byte_vector.push_back(tmpByte);
                 } else {
                     throw std::runtime_error(std::string("Invalid or unsupported format"));
                 }
-                byte_offset++;
             }
+            result->push_back(rec);
         }
-
     }
 
-    Record::Record() {}
+    Record::Record() {};
+
+    void Record::printTuple() {
+        printf("Got Tuple: (");
+        for (int idx = 0; idx < this->int_vector.size(); idx++) {
+            if (idx > 0) {
+                printf(", ");
+            }
+            printf("%d", this->int_vector.at(idx));
+        }
+        printf(")\n");
+    }
 
 
 
