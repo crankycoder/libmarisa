@@ -15,12 +15,12 @@ void REPORT_RESULT() {
     printf("Success!\n");
 }
 
-__attribute__((used)) void success()
+void EMSCRIPTEN_KEEPALIVE success()
 {
   REPORT_RESULT();
 }
 
-__attribute__((used)) void test() {
+void EMSCRIPTEN_KEEPALIVE test() {
 
   int fd;
   
