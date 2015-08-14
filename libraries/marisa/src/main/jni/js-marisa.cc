@@ -10,6 +10,10 @@
 
 using namespace std;
 
+
+typedef enum {UNLOADED, LOADED, LOAD_FAILURE} file_load_state;
+file_load_state trie_state = UNLOADED;
+
 void Record_Trie_load(marisa::Trie* _trie, const char* cFilePath)
 {
     // Neither the Trie nor the filepath should be null
@@ -117,10 +121,6 @@ extern "C" void MZOF_lookup_rtrie(const char *fname, int count, ...) {
 
 }
 
-void errback_func(const char *fname) {
-    printf("Error loading %s!\n", fname);
-}
-
 // TODO: make this public
 extern "C" void MZOF_mount_idbfs() {
     EM_ASM(
@@ -129,17 +129,38 @@ extern "C" void MZOF_mount_idbfs() {
     );
 }
 
+void EMSCRIPTEN_KEEPALIVE fsync_success()
+{
+    printf("fsync completed\n");
+}
+
 // TODO: make this public
 extern "C" void MZOF_sync_idbfs() {
     EM_ASM(
-        FS.syncfs(true, function (err) {
-            // TODO: this needs to run a C callback to capture any
-            // error messages.  At the least, sync_idbfs should return
-            // a boolean to indicate an error.
-            console.log("IDBFS sync completed with : " + err);
-        });
-    );
+            FS.syncfs(function (err) {
+                assert(!err);
+                ccall('fsync_success', 'v');
+                });
+          );
 }
+
+void load_success_callback(const char *fname) {
+    // This assert ensures that we can timeout safely
+    assert(trie_state == UNLOADED);
+
+    printf("Success loading %s!\n", fname);
+    trie_state = LOADED;
+}
+
+
+void load_failure_callback(const char *fname) {
+    // This assert ensures that we can timeout safely
+    assert(trie_state == UNLOADED);
+
+    printf("Error loading %s!\n", fname);
+    trie_state = LOAD_FAILURE;
+}
+
 
 extern "C" void MZOF_load_record_trie(const char *rtrie_url, const char* fname) {
     if( access( fname, F_OK ) != -1 ) {
@@ -148,12 +169,22 @@ extern "C" void MZOF_load_record_trie(const char *rtrie_url, const char* fname) 
     } else {
         // file doesn't exist
         printf ("File not found.  Loading from HTTP!\n");
-        emscripten_wget(rtrie_url, fname);
+        emscripten_async_wget(rtrie_url, fname, 
+                *load_success_callback, 
+                *load_failure_callback);
     }
+
+    for (int i = 0; i < 1000; i++) {
+        emscripten_sleep_with_yield(20);
+        if (trie_state != UNLOADED) {
+            return;
+        }
+    }
+    printf("Load failure. timeout.\n");
+    trie_state = LOAD_FAILURE;
 }
 
-
-void test_http_recordtrie() {
+extern "C" void test_http_recordtrie() {
     header("HTTP RecordTrie");
 
     const char* rtrie_url = "http://127.0.0.1:8000/tests/demo.record_trie";
@@ -162,18 +193,16 @@ void test_http_recordtrie() {
     MZOF_mount_idbfs();
 
     MZOF_load_record_trie(rtrie_url, fname);
-    MZOF_sync_idbfs();
 
-    MZOF_lookup_rtrie(fname, 3, "foo", "bar", "invalid_key");
+    //MZOF_lookup_rtrie(fname, 4, "foo", "bar", "invalid_key", "foo");
 
+    //MZOF_sync_idbfs();
 
     footer();
 }
 
-int main() {
-    test_trie();
-    test_bytestrie();
-    test_recordtrie();
+int EMSCRIPTEN_KEEPALIVE main() {
+    printf("Main is started!");
     test_http_recordtrie();
     emscripten_exit_with_live_runtime();
     return 0;
