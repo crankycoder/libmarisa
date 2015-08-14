@@ -169,19 +169,19 @@ extern "C" void MZOF_load_record_trie(const char *rtrie_url, const char* fname) 
     } else {
         // file doesn't exist
         printf ("File not found.  Loading from HTTP!\n");
-        emscripten_async_wget(rtrie_url, fname, 
-                *load_success_callback, 
-                *load_failure_callback);
+
+        // Note that this function requres "-s ASYNCIFY=1" and will
+        // trigger a non-fatal "uncaught exception: SimulateInfiniteLoop" error 
+        // in the console.log
+        //
+        // This is almost certainly a bug in emterpreter.  Trying to
+        // use emscripten_async_wget and a paired
+        // emscripten_sleep_with_yield doesn't help. 
+        // See commit: 5ca86a7c68 for an example using the async
+        // version of this code.
+        emscripten_wget(rtrie_url, fname);
     }
 
-    for (int i = 0; i < 1000; i++) {
-        emscripten_sleep_with_yield(20);
-        if (trie_state != UNLOADED) {
-            return;
-        }
-    }
-    printf("Load failure. timeout.\n");
-    trie_state = LOAD_FAILURE;
 }
 
 extern "C" void test_http_recordtrie() {
