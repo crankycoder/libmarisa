@@ -1,11 +1,12 @@
 #include "lib/marisa/trie.h"
 #include "emscripten.h"
 
+#include <assert.h>
 #include <iostream>
 #include <memory.h>
-#include <assert.h>
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <sys/stat.h>
 #include "js-marisa.h"
 
 using namespace std;
@@ -116,17 +117,22 @@ extern "C" void MZOF_lookup_rtrie(const char *fname, int count, ...) {
         results.clear();
     }
     va_end(ap);
-
-
-
 }
 
 // TODO: make this public
 extern "C" void MZOF_mount_idbfs() {
-    EM_ASM(
-        FS.mkdir('/IDBFS');
-        FS.mount(IDBFS, {}, '/IDBFS');
-    );
+
+    struct stat sb;
+
+    if (stat("/IDBFS", &sb) == 0 && S_ISDIR(sb.st_mode)) {
+        printf("IDBFS is already mounted!\n");
+    } else {
+        EM_ASM(
+            FS.mkdir('/IDBFS');
+            FS.mount(IDBFS, {}, '/IDBFS');
+        );
+        printf("Mounted IDBFS!\n");
+    }
 }
 
 extern "C" void EMSCRIPTEN_KEEPALIVE fsync_success()
@@ -163,10 +169,14 @@ void load_failure_callback(const char *fname) {
 
 
 extern "C" void MZOF_load_record_trie(const char *rtrie_url, const char* fname) {
-    if( access( fname, F_OK ) != -1 ) {
+    printf ("MZOF_load_record_trie\n");
+
+    if( access( fname, F_OK ) == 0) {
+        printf ("F_OK == 0\n");
         // file exists
         printf ("File already exists - trying to load directly.\n");
     } else {
+        printf ("F_OK == %d\n", access(fname, F_OK));
         // file doesn't exist
         printf ("File not found.  Loading from HTTP!\n");
 
