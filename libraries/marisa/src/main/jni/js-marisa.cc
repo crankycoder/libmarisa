@@ -129,7 +129,7 @@ extern "C" void MZOF_mount_idbfs() {
     );
 }
 
-void EMSCRIPTEN_KEEPALIVE fsync_success()
+extern "C" void EMSCRIPTEN_KEEPALIVE fsync_success()
 {
     printf("fsync completed\n");
 }
@@ -184,7 +184,7 @@ extern "C" void MZOF_load_record_trie(const char *rtrie_url, const char* fname) 
 
 }
 
-extern "C" void test_http_recordtrie() {
+extern "C" void EMSCRIPTEN_KEEPALIVE MZOF_test_http_recordtrie() {
     header("HTTP RecordTrie");
 
     const char* rtrie_url = "http://127.0.0.1:8000/tests/demo.record_trie";
@@ -194,16 +194,18 @@ extern "C" void test_http_recordtrie() {
 
     MZOF_load_record_trie(rtrie_url, fname);
 
-    //MZOF_lookup_rtrie(fname, 4, "foo", "bar", "invalid_key", "foo");
+    MZOF_lookup_rtrie(fname, 4, "foo", "bar", "invalid_key", "foo");
 
-    //MZOF_sync_idbfs();
+    MZOF_sync_idbfs();
 
     footer();
 }
 
+/*
 int EMSCRIPTEN_KEEPALIVE main() {
     printf("Main is started!");
-    test_http_recordtrie();
+    MZOF_test_http_recordtrie();
     emscripten_exit_with_live_runtime();
     return 0;
 }
+*/
