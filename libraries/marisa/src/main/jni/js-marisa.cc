@@ -119,7 +119,6 @@ extern "C" void MZOF_lookup_rtrie(const char *fname, int count, ...) {
     va_end(ap);
 }
 
-// TODO: make this public
 extern "C" void MZOF_mount_idbfs() {
 
     struct stat sb;
@@ -130,6 +129,10 @@ extern "C" void MZOF_mount_idbfs() {
         EM_ASM(
             FS.mkdir('/IDBFS');
             FS.mount(IDBFS, {}, '/IDBFS');
+            // TODO: I should probably touch a file here to indicate
+            // that the mount succeeded and test for that in the
+            // previous if block.  The current code may issue mkdir
+            // and then fail on the mount causing errors.
         );
         printf("Mounted IDBFS!\n");
     }
