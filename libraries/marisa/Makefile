@@ -13,7 +13,7 @@ PRELOAD_FILES=--preload-file tests/simple.trie --preload-file tests/simple.bytes
 JS_OUTPUT_FILES=-o build/js/offlinegeo.js
 HTML_OUTPUT_FILES=-o build/web/marisa.html
 
-EXTRA_EMSCRIPTEN_ARGS=-O2 -s ASYNCIFY=1
+EXTRA_EMSCRIPTEN_ARGS=-O0 -s ASYNCIFY=1 --pre-js buildtools/prefix.js --post-js buildtools/postfix.js
 
 EXPORT_FUNCS=-s EXPORTED_FUNCTIONS='["_MZOF_test_http_record_trie","_MZOF_lookup_rtrie","_MZOF_mount_idbfs","_MZOF_sync_idbfs","_MZOF_load_record_trie", "_fsync_success"]'
 

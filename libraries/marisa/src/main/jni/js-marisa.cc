@@ -214,11 +214,18 @@ extern "C" void EMSCRIPTEN_KEEPALIVE MZOF_test_http_recordtrie() {
     footer();
 }
 
+
 /*
+
 int EMSCRIPTEN_KEEPALIVE main() {
-    printf("Main is started!");
-    MZOF_test_http_recordtrie();
+    // NOOOO!!!! don't use a callback to regular javascript. that's
+    // submoronic.  What you want to use is a js prefix and postfix
+    // stanza for emcc so that the entire emscripten blob is preloaded
+    // by the time we hit our 'real' javascript code.
+    // emscripten_run_script("allDone()");
+
     emscripten_exit_with_live_runtime();
     return 0;
 }
+
 */
