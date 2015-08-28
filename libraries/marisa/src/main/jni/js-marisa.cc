@@ -1,13 +1,15 @@
 #include "lib/marisa/trie.h"
 #include "emscripten.h"
 
+#include "js-marisa.h"
 #include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <iostream>
 #include <memory.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include "js-marisa.h"
 
 using namespace std;
 
@@ -31,6 +33,21 @@ void header(const char* struct_name) {
 void footer() {
     printf("---------------\n");
 }
+
+bool check_trie() {
+    const char* fname = "/IDBFS/net_demo.record_trie";
+    int fd = open(fname, O_RDONLY);
+    if (fd != -1) {
+        close(fd);
+        printf("File was ok.  Closed file descriptor\n");
+        return 0;
+    } else {
+        // File descriptor could not be 
+        printf("File open failed. Trie READ Open Errno: %d\n", errno);
+        return -1;
+    }
+}
+
 
 void test_trie() {
     header("Trie");
@@ -123,9 +140,8 @@ extern "C" void MZOF_mount_idbfs() {
 
     struct stat sb;
 
-    if (stat("/IDBFS", &sb) == 0 && S_ISDIR(sb.st_mode)) {
-        printf("IDBFS is already mounted!\n");
-    } else {
+    if (check_trie() != 0) {
+        // No file exists yet
         EM_ASM(
             FS.mkdir('/IDBFS');
             FS.mount(IDBFS, {}, '/IDBFS');
@@ -141,6 +157,7 @@ extern "C" void MZOF_mount_idbfs() {
 extern "C" void EMSCRIPTEN_KEEPALIVE fsync_success()
 {
     printf("fsync completed\n");
+    check_trie();
 }
 
 // TODO: make this public
@@ -192,13 +209,18 @@ extern "C" void MZOF_load_record_trie(const char *rtrie_url, const char* fname) 
         // emscripten_sleep_with_yield doesn't help. 
         // See commit: 5ca86a7c68 for an example using the async
         // version of this code.
+        printf ("Fetching %s \n", rtrie_url);
         emscripten_wget(rtrie_url, fname);
+        check_trie();
+
     }
 
 }
 
 extern "C" void EMSCRIPTEN_KEEPALIVE MZOF_test_http_recordtrie() {
     header("HTTP RecordTrie");
+
+    check_trie();
 
     const char* rtrie_url = "http://127.0.0.1:8000/tests/demo.record_trie";
     const char* fname = "/IDBFS/net_demo.record_trie";
@@ -210,6 +232,8 @@ extern "C" void EMSCRIPTEN_KEEPALIVE MZOF_test_http_recordtrie() {
     MZOF_lookup_rtrie(fname, 4, "foo", "bar", "invalid_key", "foo");
 
     MZOF_sync_idbfs();
+
+    check_trie();
 
     footer();
 }
