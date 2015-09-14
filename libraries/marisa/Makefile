@@ -27,11 +27,14 @@ build/web/marisa.html:
 	mkdir -p build/web
 	emcc $(CPP_FILES) $(PRELOAD_FILES) $(EXTRA_EMSCRIPTEN_ARGS) $(EXPORT_FUNCS) $(HTML_OUTPUT_FILES)
 
-build/web/test_idbfs_sync.html:
+setup_fsync:
 	mkdir -p build/web
+	emcc $(LIB_MARISA)/test_idbfs_setup.c -o build/web/test_idbfs_sync.html
 
-	#emcc -DFIRST $(LIB_MARISA)/test_idbfs_sync.c -o build/web/test_idbfs_sync.html
+test_fsync:
+	mkdir -p build/web
 	emcc $(LIB_MARISA)/test_idbfs_sync.c -o build/web/test_idbfs_sync.html
+
 
 upload:
 	./gradlew bintrayUpload
