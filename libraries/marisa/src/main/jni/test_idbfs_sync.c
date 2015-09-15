@@ -24,80 +24,20 @@ void EMSCRIPTEN_KEEPALIVE test() {
 
     int fd;
 
-#if FIRST
-
-    // for each file, we first make sure it doesn't currently exist
-    // (we delete it at the end of !FIRST).  We then test an empty
-    // file plus two files each with a small amount of content
-
-    struct stat st;
-
-    // the empty file
-    if ((stat("/working1/empty.txt", &st) != -1) || (errno != ENOENT)) {
-        result = -1000 - errno;
-    }
-    printf("FIRST Errno: %d\n", errno);
-
-    fd = open("/working1/empty.txt", O_RDWR | O_CREAT, 0666);
-    if (fd == -1) {
-        result = -2000 - errno;
-    }
-    else if (close(fd) != 0) {
-        result = -3000 - errno;
-    }
-
-    // a file whose contents are just 'az'
-    if ((stat("/working1/waka.txt", &st) != -1) || (errno != ENOENT)) {
-        result = -4000 - errno;
-    }
-    fd = open("/working1/waka.txt", O_RDWR | O_CREAT, 0666);
-    if (fd == -1) {
-        result = -5000 - errno;
-    }
-    else
-    {
-        if (write(fd,"az",2) != 2) {
-            result = -6000 - errno;
-        }
-        if (close(fd) != 0) {
-            result = -7000 - errno;
-        }
-    }
-
-    // a file whose contents are random-ish string set by the test_browser.py file
-    if ((stat("/working1/moar.txt", &st) != -1) || (errno != ENOENT)) {
-        result = -8000 - errno;
-    }
-    fd = open("/working1/moar.txt", O_RDWR | O_CREAT, 0666);
-    if (fd == -1) {
-        result = -9000 - errno;
-    }
-    else
-    {
-        if (write(fd, SECRET, strlen(SECRET)) != strlen(SECRET)) {
-            result = -10000 - errno;
-        }
-        if (close(fd) != 0) {
-            result = -11000 - errno;
-        }
-    }
-
-#else
-
     // does the empty file exist?
     fd = open("/working1/empty.txt", O_RDONLY);
-    printf("Not FIRST empty.txt Errno: %d ENOENT=%d\n", errno, ENOENT);
     if (fd == -1) {
-        result = -12000 - errno;
+        printf("Error opening empty.txt for read : %s\n", strerror(errno));
+    } else {
+        printf("Success! Opened empty.txt for read.\n");
+        if (close(fd) != 0) {
+            printf("Error closing empty.txt: %s\n", strerror(errno));
+        }
     }
-    else if (close(fd) != 0) {
-        result = -13000 - errno;
-    }
-    /*
+
     if (unlink("/working1/empty.txt") != 0) {
         result = -14000 - errno;
     }
-    */
 
     // does the 'az' file exist, and does it contain 'az'?
     fd = open("/working1/waka.txt", O_RDONLY);
@@ -155,8 +95,6 @@ void EMSCRIPTEN_KEEPALIVE test() {
         }
         */
     }
-
-#endif
 
     // sync from memory state to persisted and then
     // run 'success'
