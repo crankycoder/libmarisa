@@ -15,13 +15,16 @@ HTML_OUTPUT_FILES=-o build/web/marisa.html
 
 EXTRA_EMSCRIPTEN_ARGS=-O0 -s ASYNCIFY=1 --pre-js buildtools/prefix.js --post-js buildtools/postfix.js
 
-EXPORT_FUNCS=-s EXPORTED_FUNCTIONS='["_MZOF_test_http_recordtrie","_MZOF_lookup_rtrie","_MZOF_mount_idbfs","_MZOF_sync_idbfs","_MZOF_load_record_trie", "_fsync_success"]'
+EXPORT_FUNCS=-s EXPORTED_FUNCTIONS='["_MZOF_test_http_recordtrie","_MZOF_lookup_rtrie","_MZOF_mount_idbfs","_MZOF_sync_mem_to_idbfs","_MZOF_load_record_trie", "_fsync_success", "_runHttpTrie"]'
 
 # This target is the embeddable js
-build/js/offlinegeo.js:
+# It also copies the final offlinegeo.js into the 'web' folder
+# So you can test it out from there using the
+build/js/offlinegeo.js: FORCE
 	mkdir -p build/js
 	emcc $(CPP_FILES) $(EXTRA_EMSCRIPTEN_ARGS) $(EXPORT_FUNCS) $(JS_OUTPUT_FILES)
 	cp build/js/offlinegeo.js web/lib/offlinegeo/main.js
+	open http://127.0.0.1:8000/index.html
 
 build/web/marisa.html:
 	mkdir -p build/web
@@ -38,3 +41,5 @@ test_fsync:
 
 upload:
 	./gradlew bintrayUpload
+
+FORCE:

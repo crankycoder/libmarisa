@@ -136,24 +136,6 @@ extern "C" void MZOF_lookup_rtrie(const char *fname, int count, ...) {
     va_end(ap);
 }
 
-extern "C" void MZOF_mount_idbfs() {
-
-    struct stat sb;
-
-    if (check_trie() != 0) {
-        // No file exists yet
-        EM_ASM(
-            FS.mkdir('/IDBFS');
-            FS.mount(IDBFS, {}, '/IDBFS');
-            // TODO: I should probably touch a file here to indicate
-            // that the mount succeeded and test for that in the
-            // previous if block.  The current code may issue mkdir
-            // and then fail on the mount causing errors.
-        );
-        printf("Mounted IDBFS!\n");
-    }
-}
-
 extern "C" void EMSCRIPTEN_KEEPALIVE fsync_success()
 {
     printf("fsync completed\n");
@@ -161,7 +143,7 @@ extern "C" void EMSCRIPTEN_KEEPALIVE fsync_success()
 }
 
 // TODO: make this public
-extern "C" void MZOF_sync_idbfs() {
+extern "C" void MZOF_sync_mem_to_idbfs() {
     EM_ASM(
             FS.syncfs(function (err) {
                 assert(!err);
@@ -212,44 +194,39 @@ extern "C" void MZOF_load_record_trie(const char *rtrie_url, const char* fname) 
         printf ("Fetching %s \n", rtrie_url);
         emscripten_wget(rtrie_url, fname);
         check_trie();
-
     }
+}
 
+void EMSCRIPTEN_KEEPALIVE runHttpTrie() {
+    const char* rtrie_url = "http://127.0.0.1:8000/tests/demo.record_trie";
+    const char* fname = "/IDBFS/net_demo.record_trie";
+
+    MZOF_load_record_trie(rtrie_url, fname);
+    printf("RecordTrie has been loaded!\n");
+
+    // TODO: this needs
+    MZOF_lookup_rtrie(fname, 4, "foo", "bar", "invalid_key", "foo");
+    check_trie();
+    MZOF_sync_mem_to_idbfs();
 }
 
 extern "C" void EMSCRIPTEN_KEEPALIVE MZOF_test_http_recordtrie() {
     header("HTTP RecordTrie");
+    // No file exists yet
+    EM_ASM(
+        FS.mkdir('/IDBFS');
+        FS.mount(IDBFS, {}, '/IDBFS');
 
-    check_trie();
+        // sync from persisted state into memory and then
+        // run the 'test' function
+        FS.syncfs(true, function (err) {
+            assert(!err);
+            ccall('runHttpTrie', 'v');
+            });
+    );
 
-    const char* rtrie_url = "http://127.0.0.1:8000/tests/demo.record_trie";
-    const char* fname = "/IDBFS/net_demo.record_trie";
-
-    MZOF_mount_idbfs();
-
-    MZOF_load_record_trie(rtrie_url, fname);
-
-    MZOF_lookup_rtrie(fname, 4, "foo", "bar", "invalid_key", "foo");
-
-    MZOF_sync_idbfs();
-
-    check_trie();
 
     footer();
 }
 
 
-/*
-
-int EMSCRIPTEN_KEEPALIVE main() {
-    // NOOOO!!!! don't use a callback to regular javascript. that's
-    // submoronic.  What you want to use is a js prefix and postfix
-    // stanza for emcc so that the entire emscripten blob is preloaded
-    // by the time we hit our 'real' javascript code.
-    // emscripten_run_script("allDone()");
-
-    emscripten_exit_with_live_runtime();
-    return 0;
-}
-
-*/
