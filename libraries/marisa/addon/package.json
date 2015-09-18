@@ -1,0 +1,13 @@
+{
+  "title": "Mozilla Private Location",
+  "name": "mls-offline",
+  "version": "0.0.1",
+  "description": "A private offline location provider that doesn't require uploading wireless data into a server.",
+  "main": "index.js",
+  "author": "Victor Ng",
+  "engines": {
+    "firefox": ">=38.0a1",
+    "fennec": ">=38.0a1"
+  },
+  "license": "MPL 2.0"
+}
