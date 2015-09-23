@@ -4,6 +4,8 @@ var pageMod = require("sdk/page-mod");
 
 var {Cc, Ci, Cu, Cr, Cm, components} = require("chrome");
 
+
+
 var page = pageMod.PageMod({
     include: "*",
     contentScriptWhen: "start",
@@ -12,8 +14,8 @@ var page = pageMod.PageMod({
         showOptions: true
     },
     onAttach: function(worker) {
-
                   worker.port.on("check_chrome_bits", function(addonMessage) {
+
                       function test() {
                       }
 
@@ -21,7 +23,6 @@ var page = pageMod.PageMod({
                       {
                           onChange: function (accessPoints)
                           {
-
                               // Destructuring assignment to get
                               // utility functions
                               let { add } = require('sdk/util/array');
@@ -45,6 +46,17 @@ var page = pageMod.PageMod({
                               // TODO: check the length of macList
                               // to ensure that it's > 0
                               console.log("Got mac addresses : ["+macList+"]");
+
+                              console.log("blah blah blah");
+                              let requireScope = {};
+                              console.log("requireScope created");
+                              try {
+                                  var offlinegeo = require("./lib/offlinegeo");
+                                  console.log("offline geo was loaded!");
+                              } catch (err) {
+                                  console.log("error importing offlinegeo.js: " + err.message);
+                              }
+
                               self.port.emit("check_chrome_bits", "stopScan");
                           },
 
@@ -67,7 +79,7 @@ var page = pageMod.PageMod({
 
                       console.log("Addon received message: ["+addonMessage+"]");
 
-                      if (addonMessage == "startScan") {
+                      if (addonMessage == "startOfflineScan") {
                           wifi_service.startWatching(listener);
                           console.log("wifi monitor is hooked and started!");
                       }

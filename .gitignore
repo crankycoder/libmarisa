@@ -5,6 +5,7 @@
 *.iml
 build
 obj
+@*xpi
 
 # Ignore local build properties
 local.properties
