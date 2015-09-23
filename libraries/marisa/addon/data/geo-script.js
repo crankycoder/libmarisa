@@ -1,3 +1,9 @@
+/*
+ * This module defines a replacement navigator.geolocation.* which
+ * invokes emscripten to do a lookup.
+ */
+
+
 if (self.options.showOptions) {
     function injectedCode() {
         navigator.geolocation.getCurrentPosition = function(callBack,
