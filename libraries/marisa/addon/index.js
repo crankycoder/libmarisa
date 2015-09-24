@@ -14,13 +14,20 @@ var page = pageMod.PageMod({
         showOptions: true
     },
     onAttach: function(worker) {
+                  worker.port.on("offline_bssid_scan", function(payload) {
+                      let bssid_list = payload["bssid_list"];
+
+                      // TODO: load the offlinegeo.js file, execute
+                      // the module and pass in the BSSID list into
+                      // the trie.
+                  });
+
                   worker.port.on("check_chrome_bits", function(addonMessage) {
 
                       function test() {
                       }
 
-                      test.prototype =
-                      {
+                      test.prototype = {
                           onChange: function (accessPoints)
                           {
                               // Destructuring assignment to get
@@ -47,9 +54,6 @@ var page = pageMod.PageMod({
                               // to ensure that it's > 0
                               console.log("Got mac addresses : ["+macList+"]");
 
-                              console.log("blah blah blah");
-                              let requireScope = {};
-                              console.log("requireScope created");
                               try {
                                   var offlinegeo = require("./lib/offlinegeo");
                                   console.log("offline geo was loaded!");
@@ -57,7 +61,13 @@ var page = pageMod.PageMod({
                                   console.log("error importing offlinegeo.js: " + err.message);
                               }
 
-                              self.port.emit("check_chrome_bits", "stopScan");
+                              var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
+
+                              // TODO: I hate javascript. Verify that
+                              // 'this' is the correct pointer using a
+                              // debugger and have someone code review
+                              // this.
+                              wifi_service.stopWatching(this);
                           },
 
                           onError: function (value) {
