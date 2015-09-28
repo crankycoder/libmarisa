@@ -1,0 +1,65 @@
+37,44c37,42
+< var ENVIRONMENT_IS_WEB = typeof window === 'object';
+< // Three configurations we can be running in:
+< // 1) We could be the application main() thread running in the main JS UI thread. (ENVIRONMENT_IS_WORKER == false and ENVIRONMENT_IS_PTHREAD == false)
+< // 2) We could be the application main() thread proxied to worker. (with Emscripten -s PROXY_TO_WORKER=1) (ENVIRONMENT_IS_WORKER == true, ENVIRONMENT_IS_PTHREAD == false)
+< // 3) We could be an application pthread running in a worker. (ENVIRONMENT_IS_WORKER == true and ENVIRONMENT_IS_PTHREAD == true)
+< var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
+< var ENVIRONMENT_IS_NODE = typeof process === 'object' && typeof require === 'function' && !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_WORKER;
+< var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONMENT_IS_WORKER;
+---
+> var ENVIRONMENT_IS_FXADDON = true;
+> 
+> var ENVIRONMENT_IS_WEB = false;
+> var ENVIRONMENT_IS_WORKER = false;
+> var ENVIRONMENT_IS_NODE = false;
+> var ENVIRONMENT_IS_SHELL = false;
+162,163c160,196
+< }
+< else {
+---
+> } else if (ENVIRONMENT_IS_FXADDON) {
+>     // This is a weird special case.  We're in a browser,
+>     // but some parts of the DOM aren't available.  We also 
+>     // need to care about which JS sandbox we're in. 
+>     // In the context of offline geo, we are going to be
+>     // running in the Chrome process.
+> 
+>     Module['load'] = function load(f) {
+>         globalEval(Module['read'](f));
+>     };
+> 
+>     if (!Module['print']) {
+>         Module['print'] = function print(x) {
+>           console.log(x);
+>         };
+>     }
+> 
+>     if (!Module['printErr']) {
+>       Module['printErr'] = Module['print'];
+>     }
+> 
+>     if (!Module['arguments']) {
+>       Module['arguments'] = [];
+>     }
+>     if (!Module['thisProgram']) {
+>       Module['thisProgram'] = 'private-geo';
+>     }
+> 
+>     var { indexedDB } = require('sdk/indexed-db');
+>     let { Cu } = require('chrome');
+>     Cu.importGlobalProperties(['Blob', 'URL']);
+> 
+>     console.log("Got indexedDB: " + indexedDB);
+>     console.log("Got Blob instance: " + new Blob());
+>     console.log("Got URL.createObjectURL : " + URL.createObjectURL); 
+> 
+> } else {
+5556a5590
+> 
+5557a5592,5596
+>         if (ENVIRONMENT_IS_FXADDON) {
+>             Browser.URLObject = URL;
+>         }
+>         console.log("Browser.URLObject = " + Browser.URLObject);
+> 
