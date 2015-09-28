@@ -15,11 +15,10 @@ var page = pageMod.PageMod({
     },
     onAttach: function(worker) {
                   worker.port.on("offline_bssid_scan", function(payload) {
+                      console.log("Got payload: "+payload+"");
+
                       let bssid_list = payload["bssid_list"];
 
-                      // TODO: load the offlinegeo.js file, execute
-                      // the module and pass in the BSSID list into
-                      // the trie.
                   });
 
                   worker.port.on("check_chrome_bits", function(addonMessage) {
@@ -50,24 +49,15 @@ var page = pageMod.PageMod({
 
                               }
 
-                              // TODO: check the length of macList
-                              // to ensure that it's > 0
-                              console.log("Got mac addresses : ["+macList+"]");
-
-                              try {
-                                  var offlinegeo = require("./lib/offlinegeo");
-                                  console.log("offline geo was loaded!");
-                              } catch (err) {
-                                  console.log("error importing offlinegeo.js: " + err.message);
-                              }
+                              console.log("Got raw mac addresses : ["+macList+"]");
 
                               var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
-
-                              // TODO: I hate javascript. Verify that
-                              // 'this' is the correct pointer using a
-                              // debugger and have someone code review
-                              // this.
                               wifi_service.stopWatching(this);
+
+                              var offlinegeo = require("./lib/offlinegeo");
+                              var offlinegeo_mod = offlinegeo.offline_factory();
+                              offlinegeo_mod._MZOF_test_http_recordtrie();
+
                           },
 
                           onError: function (value) {
