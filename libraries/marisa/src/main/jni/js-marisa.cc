@@ -193,6 +193,7 @@ extern "C" void MZOF_load_record_trie(const char *rtrie_url, const char* fname) 
         // version of this code.
         printf ("Fetching %s \n", rtrie_url);
         emscripten_wget(rtrie_url, fname);
+        printf ("Trie fetched\n");
         check_trie();
     }
 }
