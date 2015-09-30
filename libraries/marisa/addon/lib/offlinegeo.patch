@@ -55,11 +55,13 @@
 >     console.log("Got URL.createObjectURL : " + URL.createObjectURL); 
 > 
 > } else {
-5556a5590
-> 
-5557a5592,5596
+5546a5580,5583
 >         if (ENVIRONMENT_IS_FXADDON) {
 >             Browser.URLObject = URL;
 >         }
+> 
+5556a5594
+> 
+5557a5596,5600
 >         console.log("Browser.URLObject = " + Browser.URLObject);
 > 
