@@ -24,6 +24,7 @@ offlinegeo.js: FORCE
 	mkdir -p build/js
 	emcc $(CPP_FILES) $(EXTRA_EMSCRIPTEN_ARGS) $(EXPORT_FUNCS) $(JS_OUTPUT_FILES)
 	cp build/js/offlinegeo.js addon/lib/offlinegeo.js
+	patch addon/lib/offlinegeo.js addon/lib/offlinegeo.patch
 
 build/web/marisa.html:
 	mkdir -p build/web
