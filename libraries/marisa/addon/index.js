@@ -4,7 +4,14 @@ var pageMod = require("sdk/page-mod");
 
 var {Cc, Ci, Cu, Cr, Cm, components} = require("chrome");
 
+// Import NetUtil
+Cu.import("resource://gre/modules/NetUtil.jsm");
 
+// Import FileUtils
+Cu.import("resource://gre/modules/FileUtils.jsm");
+
+// Raw writes to files
+Cu.import("resource://gre/modules/osfile.jsm");
 
 var page = pageMod.PageMod({
     include: "*",
@@ -24,9 +31,78 @@ var page = pageMod.PageMod({
                   worker.port.on("check_chrome_bits", function(addonMessage) {
 
                       function test() {
+                          this.offlinegeo = require("./lib/offlinegeo");
+                          this.offlinegeo_mod = this.offlinegeo.offline_factory();
+
+                          this.default_trie_url = "http://127.0.0.1:8000/simple.trie";
+
+                          this.fetchTrie();
+
+                          console.log("offlinegeo_mod: " + this.offlinegeo_mod);
                       }
 
+
                       test.prototype = {
+                          
+                          fetchTrie: function(trie_url) {
+                             // This method grabs the trie off the
+                             // webserver.  We return an integer array
+                             // of data which represents the bytes
+                             // within the trie.
+                             // On failure, we return null.
+                             
+                             if (!trie_url) {
+                                 // Use the default trie URL if
+                                 // nothing is passed in.
+                                 trie_url = this.default_trie_url;
+                             }
+                             NetUtil.asyncFetch(
+                                  trie_url,
+                                  function(aInputStream, aResult) {
+                                      // Check that we had success.
+                                      if (!components.isSuccessCode(aResult))
+                                      {
+                                          console.log("An error occured while fetching the trie: " + aResult);
+                                          return null;
+                                      } else {
+                                          var bstream = Cc["@mozilla.org/binaryinputstream;1"].
+                                                createInstance(Ci.nsIBinaryInputStream);
+                                          bstream.setInputStream(aInputStream);
+                                          var bytes = bstream.readBytes(bstream.available());
+
+                                          // Extract each of `bytes.charCodeAt(index)`
+                                          // and stuff it into an integer
+                                          // array and pass it into C.
+
+
+                                          // Extract the bytes and stuff
+                                          // them into a heap allocated
+                                          // object that C++ can read from
+                                          this.int_array = [];
+                                          for (var i=0;i<bytes.length;i++) {
+                                              this.int_array.push(bytes.charCodeAt(i));
+                                          }
+                                          this.data = Uint32Array.from(this.int_array);
+
+                                          //////////////////////////////////
+                                          // Don't pull this out into
+                                          // a function
+                                          // Dump a typed array of data into a file
+                                          var profileDir = FileUtils.getFile("ProfD", []);
+                                          OS.File.writeAtomic(profileDir.path + "/cached.rtrie", data).then(
+                                                  function(aResult) { 
+                                                      console.log("Write completed! Pushing into emscripten"); 
+                                                      this.processData();
+                                                  });
+                                          //
+                                          // Trust me.  Just don't.
+                                          //////////////////////////////////
+
+
+                                    }
+                                }
+                             )
+                          },
                           onChange: function (accessPoints)
                           {
                               // Destructuring assignment to get
@@ -54,11 +130,28 @@ var page = pageMod.PageMod({
                               var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
                               wifi_service.stopWatching(this);
 
-                              var offlinegeo = require("./lib/offlinegeo");
-                              var offlinegeo_mod = offlinegeo.offline_factory();
-                              offlinegeo_mod._MZOF_test_http_recordtrie();
+                              this.offlinegeo_mod._MZOF_test_http_recordtrie();
 
                           },
+                          processData: function() {
+                              var nDataBytes = this.data.length * this.data.BYTES_PER_ELEMENT;
+                              this.dataPtr = this.offlinegeo_mod._malloc(nDataBytes);
+
+                              // Copy data to Emscripten heap
+                              // (directly accessed from Module.HEAPU8)
+                              this.dataHeap = new Uint8Array(this.offlinegeo_mod.HEAPU8.buffer,
+                                                            dataPtr,
+                                                            nDataBytes);
+                              this.dataHeap.set(new Uint8Array(this.data.buffer));
+
+                              // TODO: move this to after
+                              // the point where we call
+                              // into emscripten
+                              this.offlinegeo_mod._free(this.dataHeap.byteOffset);
+                              // TODO: set this.dataPtr to null
+                              // TODO: set this.dataHeap to null
+                          },
+
 
                           onError: function (value) {
                                        alert("error: " +value);
