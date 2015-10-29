@@ -36,8 +36,6 @@ var page = pageMod.PageMod({
 
                           this.default_trie_url = "http://127.0.0.1:8000/simple.trie";
 
-                          this.fetchTrie();
-
                           console.log("offlinegeo_mod: " + this.offlinegeo_mod);
                       }
 
@@ -51,14 +49,21 @@ var page = pageMod.PageMod({
                              // within the trie.
                              // On failure, we return null.
                              
-                             if (!trie_url) {
+                             if (trie_url) {
                                  // Use the default trie URL if
                                  // nothing is passed in.
-                                 trie_url = this.default_trie_url;
+                                 this.default_trie_url = trie_url;
                              }
+
+                             // TODO: rewrite all the anonymous functions using
+                             // fat arrow syntax so that we get
+                             // proper lexically bound 'this'
+                             // attributes
+
+                             console.log("trie_url is: " + this.default_trie_url);
                              NetUtil.asyncFetch(
-                                  trie_url,
-                                  function(aInputStream, aResult) {
+                                  this.default_trie_url,
+                                  (aInputStream, aResult) => {
                                       // Check that we had success.
                                       if (!components.isSuccessCode(aResult))
                                       {
@@ -74,7 +79,6 @@ var page = pageMod.PageMod({
                                           // and stuff it into an integer
                                           // array and pass it into C.
 
-
                                           // Extract the bytes and stuff
                                           // them into a heap allocated
                                           // object that C++ can read from
@@ -82,25 +86,42 @@ var page = pageMod.PageMod({
                                           for (var i=0;i<bytes.length;i++) {
                                               this.int_array.push(bytes.charCodeAt(i));
                                           }
-                                          this.data = Uint32Array.from(this.int_array);
 
-                                          //////////////////////////////////
-                                          // Don't pull this out into
-                                          // a function
                                           // Dump a typed array of data into a file
                                           var profileDir = FileUtils.getFile("ProfD", []);
-                                          OS.File.writeAtomic(profileDir.path + "/cached.rtrie", data).then(
-                                                  function(aResult) { 
-                                                      console.log("Write completed! Pushing into emscripten"); 
-                                                      this.processData();
-                                                  });
-                                          //
-                                          // Trust me.  Just don't.
-                                          //////////////////////////////////
+                                          var atomicCallback = (aResult) => {
+                                              var byteData = Uint8Array.from(this.int_array, (n) => n);
+                                              // TODO: check
+                                              // the result
+                                              // here
+                                              console.log("Write completed! Pushing into emscripten"); 
+                                              var nDataBytes = byteData.length * byteData.BYTES_PER_ELEMENT;
+
+                                              var dataPtr = this.offlinegeo_mod._malloc(nDataBytes);
+                                              console.log("malloc'd "+nDataBytes+" bytes");
+
+                                              // Copy data to Emscripten heap
+                                              // (directly accessed from Module.HEAPU8)
+                                              var dataHeap = new Uint8Array(this.offlinegeo_mod.HEAPU8.buffer,
+                                                                            dataPtr,
+                                                                            nDataBytes);
+                                              dataHeap.set(new Uint8Array(byteData.buffer));
+
+                                              // TODO: call emscripten
+                                              // here
 
 
-                                    }
-                                }
+                                              // You must free the
+                                              // memory after playin
+                                              // in emscripten land
+                                              this.offlinegeo_mod._free(dataHeap.byteOffset);
+                                              console.log("free'd bytes for dataHeap.byteOffset");
+                                          }
+
+                                          OS.File.writeAtomic(profileDir.path + "/cached.rtrie",
+                                                  Uint8Array.from(this.int_array, (n) => n)).then(
+                                                  atomicCallback);
+                                    }}
                              )
                           },
                           onChange: function (accessPoints)
@@ -133,26 +154,6 @@ var page = pageMod.PageMod({
                               this.offlinegeo_mod._MZOF_test_http_recordtrie();
 
                           },
-                          processData: function() {
-                              var nDataBytes = this.data.length * this.data.BYTES_PER_ELEMENT;
-                              this.dataPtr = this.offlinegeo_mod._malloc(nDataBytes);
-
-                              // Copy data to Emscripten heap
-                              // (directly accessed from Module.HEAPU8)
-                              this.dataHeap = new Uint8Array(this.offlinegeo_mod.HEAPU8.buffer,
-                                                            dataPtr,
-                                                            nDataBytes);
-                              this.dataHeap.set(new Uint8Array(this.data.buffer));
-
-                              // TODO: move this to after
-                              // the point where we call
-                              // into emscripten
-                              this.offlinegeo_mod._free(this.dataHeap.byteOffset);
-                              // TODO: set this.dataPtr to null
-                              // TODO: set this.dataHeap to null
-                          },
-
-
                           onError: function (value) {
                                        alert("error: " +value);
                                    },
@@ -169,6 +170,9 @@ var page = pageMod.PageMod({
 
                       var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
                       var listener = new test();
+
+                      // TODO: refactor this to run your own stack.
+                      listener.fetchTrie();
 
                       console.log("Addon received message: ["+addonMessage+"]");
 
