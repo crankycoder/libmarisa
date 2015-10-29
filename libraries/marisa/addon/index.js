@@ -118,6 +118,10 @@ var page = pageMod.PageMod({
                                               console.log("free'd bytes for dataHeap.byteOffset");
                                           }
 
+                                          // I have no idea why I have
+                                          // to do this double
+                                          // Uint8Array copy here, and
+                                          // in the atomicCallback
                                           OS.File.writeAtomic(profileDir.path + "/cached.rtrie",
                                                   Uint8Array.from(this.int_array, (n) => n)).then(
                                                   atomicCallback);
