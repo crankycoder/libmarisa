@@ -91,9 +91,6 @@ var page = pageMod.PageMod({
                                           var profileDir = FileUtils.getFile("ProfD", []);
                                           var atomicCallback = (aResult) => {
                                               var byteData = Uint8Array.from(this.int_array, (n) => n);
-                                              // TODO: check
-                                              // the result
-                                              // here
                                               console.log("Write completed! Pushing into emscripten"); 
                                               var nDataBytes = byteData.length * byteData.BYTES_PER_ELEMENT;
 
@@ -109,10 +106,13 @@ var page = pageMod.PageMod({
 
                                               // TODO: call emscripten
                                               // here
-
+                                              flush_trie = this.offlinegeo_mod.cwrap(
+                                                        'flush_trie', null, ['number', 'number']
+                                                      );
+                                              flush_trie(nDataBytes, dataPtr);
 
                                               // You must free the
-                                              // memory after playin
+                                              // memory after playing
                                               // in emscripten land
                                               this.offlinegeo_mod._free(dataHeap.byteOffset);
                                               console.log("free'd bytes for dataHeap.byteOffset");
