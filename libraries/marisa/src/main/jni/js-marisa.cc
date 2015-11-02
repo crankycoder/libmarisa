@@ -48,6 +48,21 @@ bool check_trie() {
     }
 }
 
+void EMSCRIPTEN_KEEPALIVE flush_trie(int length, int* int_trie_bytes) {
+
+    EM_ASM(
+        FS.mkdir('/IDBFS');
+        FS.mount(IDBFS, {}, '/IDBFS');
+    );
+
+    FILE *fp;
+    fp = fopen("/IDBFS/simple.trie", "w");
+    char* bytes = (char *) int_trie_bytes;
+    size_t wrote_bytes = fwrite(bytes, 1, length, fp);
+    fclose(fp);
+    printf("Wrote out %d bytes in c/emscripten land.\n", wrote_bytes);
+
+}
 
 void test_trie() {
     header("Trie");

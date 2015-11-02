@@ -60,8 +60,3 @@
 >             Browser.URLObject = URL;
 >         }
 > 
-5556a5594
-> 
-5557a5596,5600
->         console.log("Browser.URLObject = " + Browser.URLObject);
-> 
