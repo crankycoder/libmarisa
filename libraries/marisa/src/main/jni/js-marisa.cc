@@ -56,18 +56,41 @@ void EMSCRIPTEN_KEEPALIVE flush_trie(int length, int* int_trie_bytes) {
     );
 
     FILE *fp;
-    fp = fopen("/IDBFS/simple.trie", "w");
+    fp = fopen("/IDBFS/demo.record_trie", "w");
     char* bytes = (char *) int_trie_bytes;
+    for (int i=0; i < length; i++) {
+        printf("Character [0x%04x] = [0x%02x]\n", 0xffff & i, (0xff & bytes[i]));
+    }
     size_t wrote_bytes = fwrite(bytes, 1, length, fp);
     fclose(fp);
     printf("Wrote out %d bytes in c/emscripten land.\n", wrote_bytes);
+
+    vector<marisa::Record> results;
+
+    marisa::RecordTrie _rtrie;
+    printf("Setting format\n");
+    _rtrie.setFormat(">iii");
+    printf("Tring to MMAP\n");
+    _rtrie.mmap("/IDBFS/demo.record_trie");
+
+    printf("Caling getRecord\n");
+    _rtrie.getRecord(&results, "foo");
+    cout << "lookup foo: ";
+    for(vector<marisa::Record>::const_iterator i = results.begin(); i != results.end(); i++) {
+        marisa::Record rec = *i;
+        rec.printTuple();
+    }
+    cout << "\n";
+    //cout << "Trie get('key1'): " << _trie.getRecord(record, "key1") << "\n";
+
+    printf("MMAP'd the demo.record_trie\n");
 
 }
 
 void test_trie() {
     header("Trie");
     marisa::Trie* _trie = new marisa::Trie();
-    _trie->mmap("tests/simple.trie");
+    _trie->mmap("tests/demo.record_trie");
     printf("Trie is loaded at %p\n", _trie);
     printf("Trie has %d keys\n", _trie->num_keys());
     footer();

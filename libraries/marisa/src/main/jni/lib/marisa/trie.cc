@@ -240,10 +240,15 @@ namespace marisa {
         }
     }
 
+    RecordTrie::RecordTrie() { }
+
     RecordTrie::RecordTrie(const char *fmt) {
+        setFormat(fmt);
+    }
+
+    void RecordTrie::setFormat(const char *fmt) {
         _fmtByteLength = 0;
         _fmt.assign(fmt, strlen(fmt));
-
         _initFmtLength();
     }
 

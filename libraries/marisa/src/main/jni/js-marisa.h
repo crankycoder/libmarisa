@@ -8,4 +8,3 @@ extern "C" void fsync_success();
 extern "C" void runHttpTrie();
 
 extern "C" void flush_trie(int length, int* int_trie_bytes);
-

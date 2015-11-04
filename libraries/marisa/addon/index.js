@@ -34,7 +34,7 @@ var page = pageMod.PageMod({
                           this.offlinegeo = require("./lib/offlinegeo");
                           this.offlinegeo_mod = this.offlinegeo.offline_factory();
 
-                          this.default_trie_url = "http://127.0.0.1:8000/simple.trie";
+                          this.default_trie_url = "http://127.0.0.1:8000/demo.record_trie";
 
                           console.log("offlinegeo_mod: " + this.offlinegeo_mod);
                       }

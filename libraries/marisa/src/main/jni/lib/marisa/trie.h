@@ -79,8 +79,10 @@ namespace marisa {
 
     class RecordTrie: public BytesTrie {
         public:
+            RecordTrie();
             RecordTrie(const char* fmt);
             void getRecord(std::vector<Record> *result, const char* b_prefix);
+            void setFormat(const char *fmt);
         private:
             std::string _fmt;
             int _fmtByteLength;
