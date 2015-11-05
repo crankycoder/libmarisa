@@ -107,9 +107,17 @@ var page = pageMod.PageMod({
                                               // TODO: call emscripten
                                               // here
                                               flush_trie = this.offlinegeo_mod.cwrap(
-                                                        'flush_trie', null, ['number', 'number']
+                                                        'flush_trie', 'number', ['number', 'number']
                                                       );
-                                              flush_trie(nDataBytes, dataPtr);
+                                              rtrie_handle = flush_trie(nDataBytes, dataPtr);
+
+                                              console.log("JS sees a rtrie pointer @ : " + rtrie_handle);
+
+                                              test_trie = this.offlinegeo_mod.cwrap(
+                                                        'test_trie', null, ['number']
+                                                      );
+                                              test_trie(rtrie_handle);
+
 
                                               // You must free the
                                               // memory after playing

@@ -14,7 +14,7 @@ HTML_OUTPUT_FILES=-o build/web/marisa.html
 
 EXTRA_EMSCRIPTEN_ARGS=-O0 -s ASYNCIFY=1 --pre-js buildtools/prefix.js --post-js buildtools/postfix.js
 
-EXPORT_FUNCS=-s EXPORTED_FUNCTIONS='["_MZOF_test_http_recordtrie","_MZOF_lookup_rtrie","_MZOF_sync_mem_to_idbfs","_MZOF_load_record_trie", "_fsync_success", "_runHttpTrie", "_flush_trie"]'
+EXPORT_FUNCS=-s EXPORTED_FUNCTIONS='["_MZOF_test_http_recordtrie","_MZOF_lookup_rtrie","_MZOF_sync_mem_to_idbfs","_MZOF_load_record_trie", "_fsync_success", "_runHttpTrie", "_flush_trie", "_test_trie"]'
 
 # This target is the embeddable js
 # It also copies the final offlinegeo.js into the 'web' folder

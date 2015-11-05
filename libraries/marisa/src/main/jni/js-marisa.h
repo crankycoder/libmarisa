@@ -7,4 +7,5 @@ extern "C" void fsync_success();
 
 extern "C" void runHttpTrie();
 
-extern "C" void flush_trie(int length, int* int_trie_bytes);
+extern "C" long flush_trie(int length, int* int_trie_bytes);
+extern "C" void test_trie(long rtrie_handle);
