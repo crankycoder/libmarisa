@@ -55,12 +55,6 @@ var page = pageMod.PageMod({
                                  this.default_trie_url = trie_url;
                              }
 
-                             // TODO: rewrite all the anonymous functions using
-                             // fat arrow syntax so that we get
-                             // proper lexically bound 'this'
-                             // attributes
-
-                             console.log("trie_url is: " + this.default_trie_url);
                              NetUtil.asyncFetch(
                                   this.default_trie_url,
                                   (aInputStream, aResult) => {
@@ -104,19 +98,19 @@ var page = pageMod.PageMod({
                                                                             nDataBytes);
                                               dataHeap.set(new Uint8Array(byteData.buffer));
 
-                                              // TODO: call emscripten
-                                              // here
+                                              // This pushes the trie
+                                              // into C++ emscripten
+                                              // space
                                               push_trie = this.offlinegeo_mod.cwrap(
                                                         'flush_trie', 'number', ['number', 'number']
                                                       );
-                                              rtrie_handle = push_trie(nDataBytes, dataPtr);
 
-                                              console.log("JS sees a rtrie pointer @ : " + rtrie_handle);
+                                              this.rtrie_handle = push_trie(nDataBytes, dataPtr);
 
                                               test_trie = this.offlinegeo_mod.cwrap(
                                                         'test_trie', null, ['number']
                                                       );
-                                              test_trie(rtrie_handle);
+                                              test_trie(this.rtrie_handle);
 
                                               // You must free the
                                               // memory after playing
@@ -157,7 +151,22 @@ var page = pageMod.PageMod({
 
                               }
 
-                              console.log("Got raw mac addresses : ["+macList+"]");
+                              // Bind the maclist to the 'test'
+                              // instance
+                              this.macList = macList;
+
+                              let simpleMacList = this.macList.join("|");
+
+                              console.log("index.js captured macList: " + simpleMacList);
+                              console.log("index.js captured rtrie_handle: " + this.rtrie_handle);
+                              console.log("index.js captured offlinegeo_mod: " + this.offlinegeo_mod);
+
+                              // TODO: invoke a function passing in
+                              // the rtrie_handle, the simpleMacList
+                              // and then getting a fix.
+                              // Expect a return value of null or an
+                              // integer encoded as a string which
+                              // maps to a particular tile id.
 
                               var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
                               wifi_service.stopWatching(this);
@@ -180,7 +189,6 @@ var page = pageMod.PageMod({
                       var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
                       var listener = new test();
 
-                      // TODO: refactor this to run your own stack.
                       listener.fetchTrie();
 
                       console.log("Addon received message: ["+addonMessage+"]");
