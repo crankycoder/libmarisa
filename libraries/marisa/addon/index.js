@@ -162,10 +162,6 @@ var page = pageMod.PageMod({
                               var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
                               wifi_service.stopWatching(this);
 
-                              // TODO: pass in macList to this
-                              // function
-                              this.offlinegeo_mod._MZOF_test_http_recordtrie();
-
                           },
                           onError: function (value) {
                                        alert("error: " +value);
