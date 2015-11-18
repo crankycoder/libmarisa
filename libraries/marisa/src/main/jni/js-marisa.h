@@ -1,11 +1,9 @@
-extern "C" void MZOF_test_http_recordtrie();
 extern "C" void MZOF_lookup_rtrie(const char *fname, int count, ...);
-extern "C" void MZOF_sync_idbfs();
-extern "C" void MZOF_load_record_trie(const char *rtrie_url, const char* fname);
 
-extern "C" void fsync_success();
-
-extern "C" void runHttpTrie();
-
+// This is how you push an array of bytes into emscripten C++ code
+// We use this to push our RecordTrie into C++ from a JS function.
 extern "C" long flush_trie(int length, int* int_trie_bytes);
+
+// This is the main entry point where we pass in a pointer to the
+// record trie we have created with flush_trie.
 extern "C" void test_trie(long rtrie_handle);

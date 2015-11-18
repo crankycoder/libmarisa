@@ -106,10 +106,10 @@ var page = pageMod.PageMod({
 
                                               // TODO: call emscripten
                                               // here
-                                              flush_trie = this.offlinegeo_mod.cwrap(
+                                              push_trie = this.offlinegeo_mod.cwrap(
                                                         'flush_trie', 'number', ['number', 'number']
                                                       );
-                                              rtrie_handle = flush_trie(nDataBytes, dataPtr);
+                                              rtrie_handle = push_trie(nDataBytes, dataPtr);
 
                                               console.log("JS sees a rtrie pointer @ : " + rtrie_handle);
 
@@ -117,7 +117,6 @@ var page = pageMod.PageMod({
                                                         'test_trie', null, ['number']
                                                       );
                                               test_trie(rtrie_handle);
-
 
                                               // You must free the
                                               // memory after playing
@@ -163,6 +162,8 @@ var page = pageMod.PageMod({
                               var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
                               wifi_service.stopWatching(this);
 
+                              // TODO: pass in macList to this
+                              // function
                               this.offlinegeo_mod._MZOF_test_http_recordtrie();
 
                           },
