@@ -102,15 +102,15 @@ var page = pageMod.PageMod({
                                               // into C++ emscripten
                                               // space
                                               push_trie = this.offlinegeo_mod.cwrap(
-                                                        'flush_trie', 'number', ['number', 'number']
+                                                        'push_trie', 'number', ['number', 'number']
                                                       );
 
                                               this.rtrie_handle = push_trie(nDataBytes, dataPtr);
 
-                                              test_trie = this.offlinegeo_mod.cwrap(
-                                                        'test_trie', null, ['number']
+                                              simple_test_trie = this.offlinegeo_mod.cwrap(
+                                                        'simple_test_trie', null, ['number']
                                                       );
-                                              test_trie(this.rtrie_handle);
+                                              simple_test_trie(this.rtrie_handle);
 
                                               // You must free the
                                               // memory after playing
