@@ -14,7 +14,7 @@ HTML_OUTPUT_FILES=-o build/web/marisa.html
 
 EXTRA_EMSCRIPTEN_ARGS=-O0 -s ASYNCIFY=1 --pre-js buildtools/prefix.js --post-js buildtools/postfix.js
 
-EXPORT_FUNCS=-s EXPORTED_FUNCTIONS='["_push_trie", "_simple_test_trie"]'
+EXPORT_FUNCS=-s EXPORTED_FUNCTIONS='["_push_trie", "_simple_test_trie", "_trie_lookup"]'
 
 # This target is the embeddable js
 # It also copies the final offlinegeo.js into the 'web' folder

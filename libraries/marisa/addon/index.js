@@ -168,6 +168,16 @@ var page = pageMod.PageMod({
                               // integer encoded as a string which
                               // maps to a particular tile id.
 
+                              trie_lookup = this.offlinegeo_mod.cwrap(
+                                      'trie_lookup', 'string', ['number', 'string']
+                                      );
+
+                              var result = trie_lookup(this.rtrie_handle, simpleMacList);
+
+                              console.log("------------ Result buffer --------------");
+                              console.log(result);
+                              console.log("-------------------------------------");
+
                               var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
                               wifi_service.stopWatching(this);
 

@@ -13,7 +13,6 @@
 
 using namespace std;
 
-
 long EMSCRIPTEN_KEEPALIVE push_trie(int length, int* int_trie_bytes) {
 
     EM_ASM(
@@ -59,3 +58,20 @@ void EMSCRIPTEN_KEEPALIVE simple_test_trie(long rtrie_handle) {
     //cout << "Trie get('key1'): " << _trie.getRecord(record, "key1") << "\n";
 
 }
+
+// This is the main entry point where we pass in a pointer to the
+// record trie and a string delimited by | characters 
+// The return value is written into the result char*.
+// If no valid result exists, then we write a null into the first byte
+// of the result
+char* EMSCRIPTEN_KEEPALIVE trie_lookup(long rtrie_handle, const char* bssid_list) {
+
+    static char resultBuf[2000];
+
+    marisa::RecordTrie* _rtrie = (marisa::RecordTrie*) rtrie_handle;
+    printf("Read: [%s]\n", bssid_list);
+    sprintf(resultBuf, "%s", "blah");
+    printf("Returning [%s]\n", resultBuf);
+    return resultBuf;
+}
+
