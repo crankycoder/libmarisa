@@ -72,7 +72,8 @@ namespace marisa {
     class Record {
         public:
             Record();
-            void printTuple();
+            char* printTuple();
+            int* getIntTuple();
 
             std::vector<int> int_vector;
     };

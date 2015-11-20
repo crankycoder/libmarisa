@@ -155,7 +155,12 @@ var page = pageMod.PageMod({
                               // instance
                               this.macList = macList;
 
-                              let simpleMacList = this.macList.join("|");
+                              // Note that we have to tack an extra
+                              // delimiter at the end of line so that
+                              // we can splice the string up easily in
+                              // C++ land
+                              let delimiter = "|";
+                              let simpleMacList = this.macList.join(delimiter) + delimiter;
 
                               console.log("index.js captured macList: " + simpleMacList);
                               console.log("index.js captured rtrie_handle: " + this.rtrie_handle);

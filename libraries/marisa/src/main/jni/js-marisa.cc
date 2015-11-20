@@ -66,11 +66,46 @@ void EMSCRIPTEN_KEEPALIVE simple_test_trie(long rtrie_handle) {
 // of the result
 char* EMSCRIPTEN_KEEPALIVE trie_lookup(long rtrie_handle, const char* bssid_list) {
 
-    static char resultBuf[2000];
+    static char resultBuf[2000] = {0};
 
     marisa::RecordTrie* _rtrie = (marisa::RecordTrie*) rtrie_handle;
     printf("Read: [%s]\n", bssid_list);
-    sprintf(resultBuf, "%s", "blah");
+
+    printf("Calling trie_lookup\n");
+    vector<marisa::Record> results;
+
+    std::string bssids  = std::string(bssid_list);
+    std::string delimiter = "|";
+
+    size_t pos = 0;
+    std::string token;
+    while ((pos = bssids.find(delimiter)) != std::string::npos) {
+        token = bssids.substr(0, pos);
+
+        printf("(ignored) Looking up result for : [%s]\n", token.c_str());
+        printf("forcing token to 'foo'\n");
+        sprintf(resultBuf+strlen(resultBuf), "%s (but really using 'foo'): (", token.c_str());
+        token = "foo";
+        _rtrie->getRecord(&results, token.c_str());
+        for(vector<marisa::Record>::const_iterator i = results.begin(); i != results.end(); i++) {
+            marisa::Record rec = *i;
+            int* int_tuple = rec.getIntTuple();
+            // TODO: scan for -1 in the int_tuple to detect end of
+            // tuple
+
+            for (int i=0; i < 100; i++) {
+                printf("index[%d]=%d\n", i, int_tuple[i]);
+                if (int_tuple[i] == -1) {
+                    break;
+                }
+
+                sprintf(resultBuf+strlen(resultBuf), ", %d", int_tuple[i]);
+            }
+            sprintf(resultBuf+strlen(resultBuf), ")\n");
+        }
+        bssids.erase(0, pos + delimiter.length());
+    }
+
     printf("Returning [%s]\n", resultBuf);
     return resultBuf;
 }

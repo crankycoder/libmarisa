@@ -305,15 +305,28 @@ namespace marisa {
 
     Record::Record() {};
 
-    void Record::printTuple() {
-        printf("Got Tuple: (");
+    char* Record::printTuple() {
+        static char buff[2000];
+
+        sprintf(buff, "Got Tuple: (");
         for (int idx = 0; idx < int_vector.size(); idx++) {
             if (idx > 0) {
-                printf(", ");
+                sprintf(buff+strlen(buff), ", ");
             }
-            printf("%d", int_vector.at(idx));
+            sprintf(buff+strlen(buff), "%d", int_vector.at(idx));
         }
-        printf(")\n");
+        sprintf(buff+strlen(buff), ")");
+        printf("%s\n", buff);
+        return buff;
+    }
+
+    int* Record::getIntTuple() {
+        static int int_array[100];
+        std::fill_n(int_array, 100, -1);
+        for (int idx = 0; idx < int_vector.size(); idx++) {
+            int_array[idx] = int_vector.at(idx);
+        }
+        return int_array;
     }
 
 
