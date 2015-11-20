@@ -7,6 +7,9 @@ build
 obj
 @*xpi
 
+# Never commit the offlinegeo.js file
+libraries/marisa/addon/lib/offlinegeo.js
+
 # Ignore local build properties
 local.properties
 
