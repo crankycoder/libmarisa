@@ -1,3 +1,7 @@
+all:
+	jpm xpi
+	jpm run
+
 # Build the addon
 xpi:
 	jpm xpi
