@@ -166,6 +166,23 @@ var page = pageMod.PageMod({
                                               this.int_array.push(bytes.charCodeAt(i));
                                           }
                                           this.ordered_city_data = this.PP.parse(bytes);
+
+                                          Array.prototype.remove = function(from, to) {
+                                              var rest = this.slice((to || from) + 1 || this.length);
+                                              this.length = from < 0 ? this.length + from : from;
+                                              return this.push.apply(this, rest);
+                                          };
+
+                                          for (let i=this.ordered_city_data.data.length-1; i >= 0; i--) {
+                                              var row_data = this.ordered_city_data.data[i];
+                                              if (row_data.length != 2) {
+                                                  this.ordered_city_data.data = this.ordered_city_data.data.slice(0,i);
+                                              } else {
+                                                  row_data[0] = parseInt(row_data[0], 10);
+                                                  row_data[1] = parseInt(row_data[1], 10);
+                                              }
+                                          }
+
                                           // TODO: clean up the
                                           // ordered city data to make
                                           // sure all rows are 2
