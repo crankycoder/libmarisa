@@ -39,22 +39,6 @@ long EMSCRIPTEN_KEEPALIVE push_trie(int length, int* int_trie_bytes) {
     return (long) _rtrie;
 }
 
-void EMSCRIPTEN_KEEPALIVE simple_test_trie(long rtrie_handle) {
-
-    marisa::RecordTrie* _rtrie = (marisa::RecordTrie*) rtrie_handle;
-
-    printf("Calling getRecord\n");
-    vector<marisa::Record> results;
-    _rtrie->getRecord(&results, "foo");
-    cout << "lookup foo: ";
-    for(vector<marisa::Record>::const_iterator i = results.begin(); i != results.end(); i++) {
-        marisa::Record rec = *i;
-        rec.printTuple();
-    }
-    cout << "\n";
-    //cout << "Trie get('key1'): " << _trie.getRecord(record, "key1") << "\n";
-
-}
 
 // This is the main entry point where we pass in a pointer to the
 // record trie and a string delimited by | characters 
@@ -80,9 +64,6 @@ char* EMSCRIPTEN_KEEPALIVE trie_lookup(long rtrie_handle, const char* bssid_list
         token = bssids.substr(0, pos);
 
         printf("(ignored) Looking up result for : [%s]\n", token.c_str());
-        printf("forcing token to 'foo'\n");
-        sprintf(resultBuf+strlen(resultBuf), "%s (but really using 'foo'): (", token.c_str());
-        token = "foo";
         _rtrie->getRecord(&results, token.c_str());
         for(vector<marisa::Record>::const_iterator i = results.begin(); i != results.end(); i++) {
             marisa::Record rec = *i;

@@ -5,13 +5,6 @@ extern "C" void MZOF_lookup_rtrie(const char *fname, int count, ...);
 extern "C" long push_trie(int length, int* int_trie_bytes);
 
 // This is the main entry point where we pass in a pointer to the
-// record trie we have created with push_trie.
-// Note that this is simple a testcase to make sure that record trie
-// lookups work over the JS bridge.
-extern "C" void simple_test_trie(long rtrie_handle);
-
-
-// This is the main entry point where we pass in a pointer to the
 // record trie and a string delimited by | characters 
 // The return value is written into the result char*.
 // If no valid result exists, then we write a null into the first byte

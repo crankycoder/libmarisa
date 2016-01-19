@@ -112,11 +112,6 @@ var page = pageMod.PageMod({
 
                                                   this.rtrie_handle = push_trie(nDataBytes, dataPtr);
 
-                                                  ////////////////simple_test_trie = this.offlinegeo_mod.cwrap(
-                                                  //          'simple_test_trie', null, ['number']
-                                                  //        );
-                                                  //simple_test_trie(this.rtrie_handle);
-
                                                   // You must free the
                                                   // memory after playing
                                                   // in emscripten land
