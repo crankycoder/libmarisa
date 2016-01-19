@@ -135,6 +135,10 @@ var page = pageMod.PageMod({
                                  )
                              }
 
+                             console.log("Loading papaparse!");
+                             this.PP = require("./lib/papaparse");
+                             console.log("Successfully loaded papaparse: " + this.PP);
+
                              // Fetch the city tiles
                              NetUtil.asyncFetch(
                                   this.ordered_city_url,
@@ -161,12 +165,17 @@ var page = pageMod.PageMod({
                                           for (var i=0;i<bytes.length;i++) {
                                               this.int_array.push(bytes.charCodeAt(i));
                                           }
+                                          this.ordered_city_data = this.PP.parse(bytes);
+                                          // TODO: clean up the
+                                          // ordered city data to make
+                                          // sure all rows are 2
+                                          // elements long and cast
+                                          // all elements into integer
 
                                           // Dump a typed array of data into a file
                                           var profileDir = FileUtils.getFile("ProfD", []);
                                           var atomicCallback = (aResult) => {
                                               console.log("Status of writing city tile data: " + aResult);
-
                                               chainAsyncFetchTrie();
                                           }
 
