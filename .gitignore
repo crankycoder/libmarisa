@@ -10,6 +10,9 @@ obj
 # Never commit the offlinegeo.js file
 libraries/marisa/addon/lib/offlinegeo.js
 
+# Never commit the side effect of patching the emscripten output
+libraries/marisa/addon/lib/offlinegeo.js.orig
+
 # Ignore local build properties
 local.properties
 

@@ -34,34 +34,115 @@ var page = pageMod.PageMod({
                           this.offlinegeo = require("./lib/offlinegeo");
                           this.offlinegeo_mod = this.offlinegeo.offline_factory();
 
-                          this.default_trie_url = "http://127.0.0.1:8000/demo.record_trie";
+                          // These URLs are preconfigured in my test
+                          // server.
+                          this.default_trie_url = "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/newmarket/area.trie";
+                          this.ordered_city_url = "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/newmarket/ordered_city.csv";
 
                           console.log("offlinegeo_mod: " + this.offlinegeo_mod);
                       }
 
 
                       test.prototype = {
-                          
+
                           fetchTrie: function(trie_url) {
                              // This method grabs the trie off the
                              // webserver.  We return an integer array
                              // of data which represents the bytes
                              // within the trie.
                              // On failure, we return null.
-                             
+
                              if (trie_url) {
                                  // Use the default trie URL if
                                  // nothing is passed in.
                                  this.default_trie_url = trie_url;
                              }
 
+                             var chainAsyncFetchTrie = (trie_url) => {
+                                 console.log("successfully chained off the async fetch of the marisa trie!");
+                                 NetUtil.asyncFetch(
+                                      this.default_trie_url,
+                                      (aInputStream, aResult) => {
+                                          // Check that we had success.
+                                          if (!components.isSuccessCode(aResult))
+                                          {
+                                              console.log("An error occured while fetching the trie: " + aResult);
+                                              return null;
+                                          } else {
+                                              var bstream = Cc["@mozilla.org/binaryinputstream;1"].
+                                                    createInstance(Ci.nsIBinaryInputStream);
+                                              bstream.setInputStream(aInputStream);
+                                              var bytes = bstream.readBytes(bstream.available());
+
+                                              // Extract each of `bytes.charCodeAt(index)`
+                                              // and stuff it into an integer
+                                              // array and pass it into C.
+
+                                              // Extract the bytes and stuff
+                                              // them into a heap allocated
+                                              // object that C++ can read from
+                                              this.int_array = [];
+                                              for (var i=0;i<bytes.length;i++) {
+                                                  this.int_array.push(bytes.charCodeAt(i));
+                                              }
+
+                                              // Dump a typed array of data into a file
+                                              var profileDir = FileUtils.getFile("ProfD", []);
+                                              var atomicCallback = (aResult) => {
+                                                  var byteData = Uint8Array.from(this.int_array, (n) => n);
+                                                  console.log("Write completed! Pushing into emscripten"); 
+                                                  var nDataBytes = byteData.length * byteData.BYTES_PER_ELEMENT;
+
+                                                  var dataPtr = this.offlinegeo_mod._malloc(nDataBytes);
+                                                  console.log("malloc'd "+nDataBytes+" bytes");
+
+                                                  // Copy data to Emscripten heap
+                                                  // (directly accessed from Module.HEAPU8)
+                                                  var dataHeap = new Uint8Array(this.offlinegeo_mod.HEAPU8.buffer,
+                                                                                dataPtr,
+                                                                                nDataBytes);
+                                                  dataHeap.set(new Uint8Array(byteData.buffer));
+
+                                                  // This pushes the trie
+                                                  // into C++ emscripten
+                                                  // space
+                                                  push_trie = this.offlinegeo_mod.cwrap(
+                                                            'push_trie', 'number', ['number', 'number']
+                                                          );
+
+                                                  this.rtrie_handle = push_trie(nDataBytes, dataPtr);
+
+                                                  ////////////////simple_test_trie = this.offlinegeo_mod.cwrap(
+                                                  //          'simple_test_trie', null, ['number']
+                                                  //        );
+                                                  //simple_test_trie(this.rtrie_handle);
+
+                                                  // You must free the
+                                                  // memory after playing
+                                                  // in emscripten land
+                                                  this.offlinegeo_mod._free(dataHeap.byteOffset);
+                                                  console.log("free'd bytes for dataHeap.byteOffset");
+                                              }
+
+                                              // I have no idea why I have
+                                              // to do this double
+                                              // Uint8Array copy here, and
+                                              // in the atomicCallback
+                                              OS.File.writeAtomic(profileDir.path + "/cached.rtrie",
+                                                      Uint8Array.from(this.int_array, (n) => n)).then(
+                                                      atomicCallback);
+                                        }}
+                                 )
+                             }
+
+                             // Fetch the city tiles
                              NetUtil.asyncFetch(
-                                  this.default_trie_url,
+                                  this.ordered_city_url,
                                   (aInputStream, aResult) => {
                                       // Check that we had success.
                                       if (!components.isSuccessCode(aResult))
                                       {
-                                          console.log("An error occured while fetching the trie: " + aResult);
+                                          console.log("An error occured while fetching the ordered tile data: " + aResult);
                                           return null;
                                       } else {
                                           var bstream = Cc["@mozilla.org/binaryinputstream;1"].
@@ -84,50 +165,22 @@ var page = pageMod.PageMod({
                                           // Dump a typed array of data into a file
                                           var profileDir = FileUtils.getFile("ProfD", []);
                                           var atomicCallback = (aResult) => {
-                                              var byteData = Uint8Array.from(this.int_array, (n) => n);
-                                              console.log("Write completed! Pushing into emscripten"); 
-                                              var nDataBytes = byteData.length * byteData.BYTES_PER_ELEMENT;
+                                              console.log("Status of writing city tile data: " + aResult);
 
-                                              var dataPtr = this.offlinegeo_mod._malloc(nDataBytes);
-                                              console.log("malloc'd "+nDataBytes+" bytes");
-
-                                              // Copy data to Emscripten heap
-                                              // (directly accessed from Module.HEAPU8)
-                                              var dataHeap = new Uint8Array(this.offlinegeo_mod.HEAPU8.buffer,
-                                                                            dataPtr,
-                                                                            nDataBytes);
-                                              dataHeap.set(new Uint8Array(byteData.buffer));
-
-                                              // This pushes the trie
-                                              // into C++ emscripten
-                                              // space
-                                              push_trie = this.offlinegeo_mod.cwrap(
-                                                        'push_trie', 'number', ['number', 'number']
-                                                      );
-
-                                              this.rtrie_handle = push_trie(nDataBytes, dataPtr);
-
-                                              ////////////////simple_test_trie = this.offlinegeo_mod.cwrap(
-                                              //          'simple_test_trie', null, ['number']
-                                              //        );
-                                              //simple_test_trie(this.rtrie_handle);
-
-                                              // You must free the
-                                              // memory after playing
-                                              // in emscripten land
-                                              this.offlinegeo_mod._free(dataHeap.byteOffset);
-                                              console.log("free'd bytes for dataHeap.byteOffset");
+                                              chainAsyncFetchTrie();
                                           }
 
                                           // I have no idea why I have
                                           // to do this double
                                           // Uint8Array copy here, and
                                           // in the atomicCallback
-                                          OS.File.writeAtomic(profileDir.path + "/cached.rtrie",
+                                          OS.File.writeAtomic(profileDir.path + "/ordered_city.csv",
                                                   Uint8Array.from(this.int_array, (n) => n)).then(
                                                   atomicCallback);
                                     }}
                              )
+
+                             // Fetch the marisa trie
                           },
                           onChange: function (accessPoints)
                           {

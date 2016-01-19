@@ -23,9 +23,6 @@ long EMSCRIPTEN_KEEPALIVE push_trie(int length, int* int_trie_bytes) {
     FILE *fp;
     fp = fopen("/IDBFS/demo.record_trie", "w");
     char* bytes = (char *) int_trie_bytes;
-    for (int i=0; i < length; i++) {
-        printf("Character [0x%04x] = [0x%02x]\n", 0xffff & i, (0xff & bytes[i]));
-    }
     size_t wrote_bytes = fwrite(bytes, 1, length, fp);
     fclose(fp);
     printf("Wrote out %d bytes in c/emscripten land.\n", wrote_bytes);
