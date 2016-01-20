@@ -62,14 +62,12 @@ char* EMSCRIPTEN_KEEPALIVE trie_lookup(long rtrie_handle, const char* bssid_list
     std::string token;
     while ((pos = bssids.find(delimiter)) != std::string::npos) {
         token = bssids.substr(0, pos);
-
         printf("(ignored) Looking up result for : [%s]\n", token.c_str());
         _rtrie->getRecord(&results, token.c_str());
+        printf("[%s] results object length: %d\n", token.c_str(), results.size());
         for(vector<marisa::Record>::const_iterator i = results.begin(); i != results.end(); i++) {
             marisa::Record rec = *i;
             int* int_tuple = rec.getIntTuple();
-            // TODO: scan for -1 in the int_tuple to detect end of
-            // tuple
 
             for (int i=0; i < 100; i++) {
                 printf("index[%d]=%d\n", i, int_tuple[i]);

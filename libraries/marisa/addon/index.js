@@ -52,6 +52,8 @@ var page = pageMod.PageMod({
                              // within the trie.
                              // On failure, we return null.
 
+                             this.sha256 = require("./lib/sha256");
+
                              if (trie_url) {
                                  // Use the default trie URL if
                                  // nothing is passed in.
@@ -169,6 +171,15 @@ var page = pageMod.PageMod({
                                           };
 
                                           for (let i=this.ordered_city_data.data.length-1; i >= 0; i--) {
+                                              // clean up the
+                                              // ordered city data to make
+                                              // sure all rows are 2
+                                              // elements long and cast
+                                              // all elements into integer
+                                              // This can be done
+                                              // within the parse
+                                              // function on
+                                              // PP.parse(...)
                                               var row_data = this.ordered_city_data.data[i];
                                               if (row_data.length != 2) {
                                                   this.ordered_city_data.data = this.ordered_city_data.data.slice(0,i);
@@ -178,11 +189,6 @@ var page = pageMod.PageMod({
                                               }
                                           }
 
-                                          // TODO: clean up the
-                                          // ordered city data to make
-                                          // sure all rows are 2
-                                          // elements long and cast
-                                          // all elements into integer
 
                                           // Dump a typed array of data into a file
                                           var profileDir = FileUtils.getFile("ProfD", []);
@@ -225,9 +231,16 @@ var page = pageMod.PageMod({
 
                               }
 
-                              // Bind the maclist to the 'test'
-                              // instance
                               this.macList = macList;
+                              for (var i=0;i<macList.length;i++) {
+                                  var bssid = this.macList[i];
+                                  this.macList[i] = this.sha256.hash(bssid).slice(0,12);
+                              }
+
+                              // TODO: convert each element in
+                              // this.macList into a sha256 hexdigest
+                              // and use the 12 character prefix of
+                              // the hash
 
                               // Note that we have to tack an extra
                               // delimiter at the end of line so that
