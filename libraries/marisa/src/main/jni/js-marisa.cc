@@ -47,7 +47,7 @@ long EMSCRIPTEN_KEEPALIVE push_trie(int length, int* int_trie_bytes) {
 // of the result
 char* EMSCRIPTEN_KEEPALIVE trie_lookup(long rtrie_handle, const char* bssid_list) {
 
-    static char resultBuf[2000] = {0};
+    static char resultBuf[10000] = {0};
 
     marisa::RecordTrie* _rtrie = (marisa::RecordTrie*) rtrie_handle;
     printf("Read: [%s]\n", bssid_list);
@@ -70,14 +70,17 @@ char* EMSCRIPTEN_KEEPALIVE trie_lookup(long rtrie_handle, const char* bssid_list
             int* int_tuple = rec.getIntTuple();
 
             for (int i=0; i < 100; i++) {
-                printf("index[%d]=%d\n", i, int_tuple[i]);
                 if (int_tuple[i] == -1) {
                     break;
                 }
 
-                sprintf(resultBuf+strlen(resultBuf), ", %d", int_tuple[i]);
+                if (strlen(resultBuf) == 0) {
+                    sprintf(resultBuf+strlen(resultBuf), "%d", int_tuple[i]);
+                }
+                else {
+                    sprintf(resultBuf+strlen(resultBuf), "|%d", int_tuple[i]);
+                }
             }
-            sprintf(resultBuf+strlen(resultBuf), ")\n");
         }
         bssids.erase(0, pos + delimiter.length());
     }
