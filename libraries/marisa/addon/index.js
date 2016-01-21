@@ -162,15 +162,9 @@ var page = pageMod.PageMod({
                                           for (var i=0;i<bytes.length;i++) {
                                               this.int_array.push(bytes.charCodeAt(i));
                                           }
-                                          this.ordered_city_data = this.PP.parse(bytes);
+                                          this.ordered_city_data = this.PP.parse(bytes).data;
 
-                                          Array.prototype.remove = function(from, to) {
-                                              var rest = this.slice((to || from) + 1 || this.length);
-                                              this.length = from < 0 ? this.length + from : from;
-                                              return this.push.apply(this, rest);
-                                          };
-
-                                          for (let i=this.ordered_city_data.data.length-1; i >= 0; i--) {
+                                          for (let i=this.ordered_city_data.length-1; i >= 0; i--) {
                                               // clean up the
                                               // ordered city data to make
                                               // sure all rows are 2
@@ -180,9 +174,9 @@ var page = pageMod.PageMod({
                                               // within the parse
                                               // function on
                                               // PP.parse(...)
-                                              var row_data = this.ordered_city_data.data[i];
+                                              var row_data = this.ordered_city_data[i];
                                               if (row_data.length != 2) {
-                                                  this.ordered_city_data.data = this.ordered_city_data.data.slice(0,i);
+                                                  this.ordered_city_data = this.ordered_city_data.slice(0,i);
                                               } else {
                                                   row_data[0] = parseInt(row_data[0], 10);
                                                   row_data[1] = parseInt(row_data[1], 10);
@@ -233,14 +227,14 @@ var page = pageMod.PageMod({
 
                               this.macList = macList;
                               for (var i=0;i<macList.length;i++) {
+                                  // convert each element in
+                                  // this.macList into a sha256 hexdigest
+                                  // and use the 12 character prefix of
+                                  // the hash
                                   var bssid = this.macList[i];
                                   this.macList[i] = this.sha256.hash(bssid).slice(0,12);
                               }
 
-                              // TODO: convert each element in
-                              // this.macList into a sha256 hexdigest
-                              // and use the 12 character prefix of
-                              // the hash
 
                               // Note that we have to tack an extra
                               // delimiter at the end of line so that
@@ -253,22 +247,68 @@ var page = pageMod.PageMod({
                               console.log("index.js captured rtrie_handle: " + this.rtrie_handle);
                               console.log("index.js captured offlinegeo_mod: " + this.offlinegeo_mod);
 
-                              // TODO: invoke a function passing in
-                              // the rtrie_handle, the simpleMacList
-                              // and then getting a fix.
-                              // Expect a return value of null or an
-                              // integer encoded as a string which
-                              // maps to a particular tile id.
-
                               trie_lookup = this.offlinegeo_mod.cwrap(
                                       'trie_lookup', 'string', ['number', 'string']
                                       );
 
                               var result = trie_lookup(this.rtrie_handle, simpleMacList);
 
-                              console.log("------------ Result buffer --------------");
-                              console.log(result);
-                              console.log("-------------------------------------");
+                              var tile_ids = result.split("|").map(function(k) { return parseInt(k, 10); });
+                              var hit_map = {};
+                              // Cast all the tile_id values to int
+                              for (var idx = 0; idx < tile_ids.length; idx++) {
+                                  var int_tile_id = tile_ids[idx];
+                                  if (int_tile_id in hit_map) {
+                                      hit_map[int_tile_id] += 1;
+                                  } else {
+                                      hit_map[int_tile_id] = 1;
+                                  }
+                              }
+
+                              /********************************/
+                              var inverted = {};
+                              var tile_hits_arr = Object.keys(hit_map).map(function (tile_id) { 
+                                  var tile_hits = hit_map[tile_id];
+                                  if (tile_hits in inverted) {
+                                      inverted[tile_hits].push(tile_id);
+                                  } else {
+                                      inverted[tile_hits] = [tile_id];
+                                  }
+                                  return tile_hits;
+                              });
+                              var max = Math.max.apply(null, tile_hits_arr);
+                              /********************************/
+
+                              if (max > 1) {
+                                  // Proper match found
+                                  var matched_tile_ids = inverted[max];
+                                  console.log("Matched tile IDs: " + matched_tile_ids);
+
+                                  function tile2lon(x,z) {
+                                      return (x/Math.pow(2,z)*360-180);
+                                  }
+                                  function tile2lat(y,z) {
+                                      var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
+                                      return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
+                                  }
+
+                                  for (var idx = 0; idx < matched_tile_ids.length; idx++) {
+                                      var tmp_tileid = matched_tile_ids[idx];
+                                      var osm_tuple = this.ordered_city_data[tmp_tileid];
+
+                                      var lat = tile2lat(osm_tuple[1], 18);
+                                      var lon = tile2lon(osm_tuple[0], 18);
+
+                                      console.log("Match tuple is: " + osm_tuple);
+                                      console.log("Lat/lon: ["+lat+"] ["+lon+"]");
+                                  }
+                                  // TODO: pass the lat/lon back over
+                                  // the message passing interface
+                                  return matched_tile_ids;
+                              } else {
+                                  // 0 or 1 hits isn't enough to
+                                  // resolve a fix
+                              }
 
                               var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
                               wifi_service.stopWatching(this);
