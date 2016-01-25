@@ -3,6 +3,17 @@
  * invokes emscripten to do a lookup.
  */
 
+self.port.on("offline_fix_found", function(message) {
+    // This listener receives messages from index.js to get the
+    // lat/lon JSON blob.  We then forward this message on to the page
+    // script
+    
+    // Tag this JSON object so that we can just test the string in 
+    // the page javascript before we try the callback
+    message['__fx_elm_location'] = 1;
+    var json_msg = JSON.stringify(message);
+    window.postMessage(json_msg, "*");
+});
 
 if (self.options.showOptions) {
     function injectedCode() {
@@ -67,27 +78,69 @@ if (self.options.showOptions) {
         navigator.geolocation.clearWatch = function () {
             alert("clearWatch was called");
         };
-       
-        // remove script
-        var s = document.getElementById('__lg_script');
+        
+        // Remove script
+        // Ok - this is a bit wacky and probably unnecessary.
+        // Once we're finished clobbering the navigator.geolocation
+        // namespace - we actually *delete* the clobbering code from
+        // the page content.  Just to be sneaky.
+        
+        /*
+        var s = document.getElementById('__offline_clobber');
         if (s) {
             s.remove();	// DEMO: in demo injectCode is run directly so there's no script
         }
+        */
     }
 
     if (document.documentElement.tagName.toLowerCase() == 'html') { // only for html
+        // Step 1- Clobber the navigator.geolocation namespace
         var inject = "(function(){"
             + injectedCode +
             " injectedCode();" +
             "})()";
 
         var script = document.createElement('script');
-        script.setAttribute('id', '__lg_script');
+        script.setAttribute('id', '__offline_clobber');
         script.appendChild(document.createTextNode(inject));
 
         // FF: there is already another variable in the scope named
         // 'parent', this causes a very hard to catch bug so we'll
         // just call this '_parent'
+        var _parent = document.head || document.body || document.documentElement;
+        var firstChild = (_parent.childNodes && (_parent.childNodes.length > 0)) ? _parent.childNodes[0] : null;
+        if (firstChild) {
+            _parent.insertBefore(script, firstChild);
+        } else {
+            _parent.appendChild(script);
+        }
+
+        // Step 2 - add a listener for offline fixes
+        // Now inject a listener for when the content script passes 
+        // a message with the offline fix.
+        var script = document.createElement('script');
+        var inject = "window.addEventListener('message', function(event) {  \
+            console.log('Page got a message: ' + event.data);  \
+            if (event.data.substring('__fx_elm_location' > -1)) {  \
+                var json_obj = JSON.parse(event.data);  \
+                function MockGeoPositionObject(lat, lng, acc) {  \
+                  this.coords = new MockGeoCoordsObject(lat, lng, acc, 0, 0);  \
+                  this.address = null;  \
+                  this.timestamp = Date.now();  \
+                }  \
+                function MockGeoCoordsObject(lat, lon, acc, alt, altacc) {  \
+                  this.latitude = lat;  \
+                  this.longitude = lon;  \
+                  this.accuracy = acc;  \
+                  this.altitude = alt;  \
+                  this.altitudeAccuracy = altacc;  \
+                }  \
+                navigator.geolocation.captured_callBack(new MockGeoPositionObject(json_obj['lat'], json_obj['lon'], 100));  \
+            }  \
+         }, false);";
+
+        script.setAttribute('id', '__offline_receiver');
+        script.appendChild(document.createTextNode(inject));
         var _parent = document.head || document.body || document.documentElement;
         var firstChild = (_parent.childNodes && (_parent.childNodes.length > 0)) ? _parent.childNodes[0] : null;
         if (firstChild) {
