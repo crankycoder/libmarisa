@@ -301,6 +301,8 @@ var page = pageMod.PageMod({
 
                                       console.log("Match tuple is: " + osm_tuple);
                                       console.log("Lat/lon: ["+lat+"] ["+lon+"]");
+                                      worker.port.emit("offline_fix_found", {'lat': lat, 'lon': lon});
+                                      console.log("Emitted the offline_fix data.");
                                   }
                                   // TODO: pass the lat/lon back over
                                   // the message passing interface
