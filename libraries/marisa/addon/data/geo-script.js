@@ -4,6 +4,8 @@
  */
 
 self.port.on("offline_fix_found", function(message) {
+    console.log("DEBUG: geo-script.js received a message: " + JSON.stringify(message));
+
     // This listener receives messages from index.js to get the
     // lat/lon JSON blob.  We then forward this message on to the page
     // script
