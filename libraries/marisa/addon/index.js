@@ -321,12 +321,13 @@ var page = pageMod.PageMod({
                                       worker.port.emit("offline_fix_found", {'lat': lat, 'lon': lon});
                                       console.log("Emitted the offline_fix data.");
                                   }
-                                  // TODO: pass the lat/lon back over
-                                  // the message passing interface
-                                  return matched_tile_ids;
+
                               } else {
                                   // 0 or 1 hits isn't enough to
                                   // resolve a fix
+                                  //
+                                  // Send back an empty match
+                                  worker.port.emit("offline_fix_found", {});
                               }
 
                               wifi_service.stopWatching(this);
