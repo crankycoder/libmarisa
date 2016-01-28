@@ -3,6 +3,7 @@ var data = require("sdk/self").data;
 var pageMod = require("sdk/page-mod");
 
 var simple_prefs = require("sdk/simple-prefs");
+var sha256 = require("./lib/sha256");
 
 var {Cc, Ci, Cu, Cr, Cm, components} = require("chrome");
 
@@ -67,8 +68,6 @@ var page = pageMod.PageMod({
                              // of data which represents the bytes
                              // within the trie.
                              // On failure, we return null.
-
-                             this.sha256 = require("./lib/sha256");
 
                              if (trie_url) {
                                  // Use the default trie URL if
@@ -248,7 +247,7 @@ var page = pageMod.PageMod({
                                   // and use the 12 character prefix of
                                   // the hash
                                   var bssid = this.macList[i];
-                                  this.macList[i] = this.sha256.hash(bssid).slice(0,12);
+                                  this.macList[i] = sha256.hash(bssid).slice(0,12);
                               }
 
 
