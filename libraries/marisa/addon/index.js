@@ -7,6 +7,8 @@ var sha256 = require("./lib/sha256");
 
 var {Cc, Ci, Cu, Cr, Cm, components} = require("chrome");
 
+var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
+
 // Import NetUtil
 Cu.import("resource://gre/modules/NetUtil.jsm");
 
@@ -327,7 +329,6 @@ var page = pageMod.PageMod({
                                   // resolve a fix
                               }
 
-                              var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
                               wifi_service.stopWatching(this);
 
                           },
@@ -345,7 +346,6 @@ var page = pageMod.PageMod({
                       }
 
 
-                      var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
                       var listener = new test();
 
                       listener.fetchTrie();
