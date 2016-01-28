@@ -2,6 +2,8 @@ var self = require("sdk/self");
 var data = require("sdk/self").data;
 var pageMod = require("sdk/page-mod");
 
+var simple_prefs = require("sdk/simple-prefs");
+
 var {Cc, Ci, Cu, Cr, Cm, components} = require("chrome");
 
 // Import NetUtil
@@ -12,6 +14,20 @@ Cu.import("resource://gre/modules/FileUtils.jsm");
 
 // Raw writes to files
 Cu.import("resource://gre/modules/osfile.jsm");
+
+
+function onPrefChange(prefName) {
+    console.log("The preference " + prefName + " value has changed!");
+    console.log("New pref value: [" + simple_prefs.prefs[prefName] + "]");
+    // TODO: update the trie and ordered city tile data herd
+}
+
+
+simple_prefs.on("offlineCity", onPrefChange);
+
+// TODO: do a quick test to see if we've downloaded any trie and city
+// tile data.  If no such content exists in persistent storage, force
+// a download of the data.
 
 var page = pageMod.PageMod({
     include: "*",
@@ -92,7 +108,7 @@ var page = pageMod.PageMod({
                                               var profileDir = FileUtils.getFile("ProfD", []);
                                               var atomicCallback = (aResult) => {
                                                   var byteData = Uint8Array.from(this.int_array, (n) => n);
-                                                  console.log("Write completed! Pushing into emscripten"); 
+                                                  console.log("Write completed! Pushing into emscripten");
                                                   var nDataBytes = byteData.length * byteData.BYTES_PER_ELEMENT;
 
                                                   var dataPtr = this.offlinegeo_mod._malloc(nDataBytes);
@@ -267,7 +283,7 @@ var page = pageMod.PageMod({
 
                               /********************************/
                               var inverted = {};
-                              var tile_hits_arr = Object.keys(hit_map).map(function (tile_id) { 
+                              var tile_hits_arr = Object.keys(hit_map).map(function (tile_id) {
                                   var tile_hits = hit_map[tile_id];
                                   if (tile_hits in inverted) {
                                       inverted[tile_hits].push(tile_id);
@@ -345,6 +361,3 @@ var page = pageMod.PageMod({
                   });
               }
 });
-
-
-

@@ -2,6 +2,18 @@
   "title": "Mozilla Private Location",
   "name": "mls-offline",
   "version": "0.0.1",
+  "preferences": [{
+      "name": "offlineCity",
+      "type": "menulist",
+      "title": "City Data Pack",
+      "value": 1,
+      "options": [{"value": "0",
+                   "label": "Toronto, ON"},
+                  {"value": "1",
+                   "label": "Newmarket, ON"},
+                  {"value": "2",
+                   "label": "Manhattan, NY"}]
+  }],
   "description": "A private offline location provider that doesn't require uploading wireless data into a server.",
   "main": "index.js",
   "author": "Victor Ng",
