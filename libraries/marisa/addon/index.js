@@ -19,6 +19,16 @@ Cu.import("resource://gre/modules/FileUtils.jsm");
 Cu.import("resource://gre/modules/osfile.jsm");
 
 
+var offlinegeo = require("./lib/offlinegeo");
+var offlinegeo_mod = offlinegeo.offline_factory();
+console.log("offlinegeo_mod: " + offlinegeo_mod);
+
+
+// This pushes the trie
+// into C++ emscripten
+// space
+var push_trie = offlinegeo_mod.cwrap('push_trie', 'number', ['number', 'number']);
+
 function onPrefChange(prefName) {
     console.log("The preference " + prefName + " value has changed!");
     console.log("New pref value: [" + simple_prefs.prefs[prefName] + "]");
@@ -50,15 +60,12 @@ var page = pageMod.PageMod({
                   worker.port.on("check_chrome_bits", function(addonMessage) {
 
                       function test() {
-                          this.offlinegeo = require("./lib/offlinegeo");
-                          this.offlinegeo_mod = this.offlinegeo.offline_factory();
 
                           // These URLs are preconfigured in my test
                           // server.
                           this.default_trie_url = "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/newmarket/area.trie";
                           this.ordered_city_url = "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/newmarket/ordered_city.csv";
 
-                          console.log("offlinegeo_mod: " + this.offlinegeo_mod);
                       }
 
 
@@ -112,29 +119,22 @@ var page = pageMod.PageMod({
                                                   console.log("Write completed! Pushing into emscripten");
                                                   var nDataBytes = byteData.length * byteData.BYTES_PER_ELEMENT;
 
-                                                  var dataPtr = this.offlinegeo_mod._malloc(nDataBytes);
+                                                  var dataPtr = offlinegeo_mod._malloc(nDataBytes);
                                                   console.log("malloc'd "+nDataBytes+" bytes");
 
                                                   // Copy data to Emscripten heap
                                                   // (directly accessed from Module.HEAPU8)
-                                                  var dataHeap = new Uint8Array(this.offlinegeo_mod.HEAPU8.buffer,
+                                                  var dataHeap = new Uint8Array(offlinegeo_mod.HEAPU8.buffer,
                                                                                 dataPtr,
                                                                                 nDataBytes);
                                                   dataHeap.set(new Uint8Array(byteData.buffer));
-
-                                                  // This pushes the trie
-                                                  // into C++ emscripten
-                                                  // space
-                                                  push_trie = this.offlinegeo_mod.cwrap(
-                                                            'push_trie', 'number', ['number', 'number']
-                                                          );
 
                                                   this.rtrie_handle = push_trie(nDataBytes, dataPtr);
 
                                                   // You must free the
                                                   // memory after playing
                                                   // in emscripten land
-                                                  this.offlinegeo_mod._free(dataHeap.byteOffset);
+                                                  offlinegeo_mod._free(dataHeap.byteOffset);
                                                   console.log("free'd bytes for dataHeap.byteOffset");
                                               }
 
@@ -262,9 +262,9 @@ var page = pageMod.PageMod({
 
                               console.log("index.js captured macList: " + simpleMacList);
                               console.log("index.js captured rtrie_handle: " + this.rtrie_handle);
-                              console.log("index.js captured offlinegeo_mod: " + this.offlinegeo_mod);
+                              console.log("index.js captured offlinegeo_mod: " + offlinegeo_mod);
 
-                              trie_lookup = this.offlinegeo_mod.cwrap(
+                              trie_lookup = offlinegeo_mod.cwrap(
                                       'trie_lookup', 'string', ['number', 'string']
                                       );
 
