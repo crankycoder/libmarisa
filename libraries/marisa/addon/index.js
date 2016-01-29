@@ -18,6 +18,10 @@ simple_prefs.on("offlineCity", onPrefChange);
 // TODO: do a quick test to see if we've downloaded any trie and city
 // tile data.  If no such content exists in persistent storage, force
 // a download of the data.
+//
+//
+var locator = new libtrielookup.TrieLocator(offlinegeo_mod);
+locator.fetchTrie();
 
 var page = pageMod.PageMod({
     include: "*",
@@ -35,9 +39,8 @@ var page = pageMod.PageMod({
                       // Note: the trielookup needs to return an
                       // object for *each* worker and the lookup must
                       // operate scoped to just that worker.
-                      var locator = new libtrielookup.TrieLocator(offlinegeo_mod, worker);
+                      locator.set_worker(worker);
 
-                      locator.fetchTrie();
                       console.log("Addon received message: ["+addonMessage+"]");
                       if (addonMessage == "startOfflineScan") {
                           locator.startWatch();

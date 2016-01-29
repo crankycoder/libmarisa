@@ -19,11 +19,10 @@ var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonito
 
 var sha256 = require("./sha256");
 
-function TrieLocator(m, w) {
+function TrieLocator(m) {
     // These URLs are preconfigured in my test
     // server.
     this.offlinegeo_mod = m;
-    this.worker = w;
     this.default_trie_url = "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/newmarket/area.trie";
     this.ordered_city_url = "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/newmarket/ordered_city.csv";
 
@@ -182,6 +181,11 @@ TrieLocator.prototype = {
 
                        // Fetch the marisa trie
                },
+    set_worker: function(w) {
+        // TODO: change this to return a closure so that 
+        // the worker is bound to just this instance.
+        this.worker = w;
+    },
     startWatch: function()
     {
         wifi_service.startWatching(this);
