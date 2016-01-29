@@ -1,16 +1,9 @@
 var self = require("sdk/self");
-var data = require("sdk/self").data;
 var pageMod = require("sdk/page-mod");
-
 var simple_prefs = require("sdk/simple-prefs");
 
-var {Cc, Ci, Cu, Cr, Cm, components} = require("chrome");
-var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
-
-
-var offlinegeo = require("./lib/offlinegeo");
-var offlinegeo_mod = offlinegeo.offline_factory();
-console.log("offlinegeo_mod: " + offlinegeo_mod);
+var libofflinegeo = require("./lib/offlinegeo");
+var offlinegeo_mod = libofflinegeo.offline_factory();
 
 var lib_trielookup = require("./lib/trielookup");
 
@@ -19,7 +12,6 @@ function onPrefChange(prefName) {
     console.log("New pref value: [" + simple_prefs.prefs[prefName] + "]");
     // TODO: update the trie and ordered city tile data herd
 }
-
 
 simple_prefs.on("offlineCity", onPrefChange);
 
@@ -30,7 +22,7 @@ simple_prefs.on("offlineCity", onPrefChange);
 var page = pageMod.PageMod({
     include: "*",
     contentScriptWhen: "start",
-    contentScriptFile: [data.url("geo-script.js"), data.url("customWifi.js")],
+    contentScriptFile: [self.data.url("geo-script.js"), self.data.url("customWifi.js")],
     contentScriptOptions: {
         showOptions: true
     },
@@ -43,7 +35,15 @@ var page = pageMod.PageMod({
                   });
 
                   worker.port.on("check_chrome_bits", function(addonMessage) {
+                      // TODO: split these operations:
+                      // 1. construction with offlinegeo_mod
+                      // 2. Passing in the worker
+                      // 3. Downloading the trie
+                      // Note: the trielookup needs to return an
+                      // object for *each* worker and the lookup must
+                      // operate scoped to just that worker.
                       var listener = new lib_trielookup.test(offlinegeo_mod, worker);
+
                       listener.fetchTrie();
                       console.log("Addon received message: ["+addonMessage+"]");
                       if (addonMessage == "startOfflineScan") {
