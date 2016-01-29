@@ -1,4 +1,4 @@
-exports.test = test;
+exports.TrieLocator = TrieLocator;
 
 var {Cc, Ci, Cu, Cr, Cm, components} = require("chrome");
 
@@ -19,7 +19,7 @@ var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonito
 
 var sha256 = require("./sha256");
 
-function test(m, w) {
+function TrieLocator(m, w) {
     // These URLs are preconfigured in my test
     // server.
     this.offlinegeo_mod = m;
@@ -35,7 +35,7 @@ function test(m, w) {
 }
 
 
-test.prototype = {
+TrieLocator.prototype = {
     fetchTrie: function(trie_url) {
                    // This method grabs the trie off the
                    // webserver.  We return an integer array
@@ -184,7 +184,8 @@ test.prototype = {
                },
     startWatch: function()
     {
-                    wifi_service.startWatching(this); 
+        wifi_service.startWatching(this);
+        console.log("wifi monitor is hooked and started!");
     },
     onChange: function (accessPoints)
     {

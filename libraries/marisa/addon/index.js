@@ -5,7 +5,7 @@ var simple_prefs = require("sdk/simple-prefs");
 var libofflinegeo = require("./lib/offlinegeo");
 var offlinegeo_mod = libofflinegeo.offline_factory();
 
-var lib_trielookup = require("./lib/trielookup");
+var libtrielookup = require("./lib/trielookup");
 
 function onPrefChange(prefName) {
     console.log("The preference " + prefName + " value has changed!");
@@ -27,13 +27,6 @@ var page = pageMod.PageMod({
         showOptions: true
     },
     onAttach: function(worker) {
-                  worker.port.on("offline_bssid_scan", function(payload) {
-                      console.log("Got payload: "+payload+"");
-
-                      let bssid_list = payload["bssid_list"];
-
-                  });
-
                   worker.port.on("check_chrome_bits", function(addonMessage) {
                       // TODO: split these operations:
                       // 1. construction with offlinegeo_mod
@@ -42,13 +35,12 @@ var page = pageMod.PageMod({
                       // Note: the trielookup needs to return an
                       // object for *each* worker and the lookup must
                       // operate scoped to just that worker.
-                      var listener = new lib_trielookup.test(offlinegeo_mod, worker);
+                      var locator = new libtrielookup.TrieLocator(offlinegeo_mod, worker);
 
-                      listener.fetchTrie();
+                      locator.fetchTrie();
                       console.log("Addon received message: ["+addonMessage+"]");
                       if (addonMessage == "startOfflineScan") {
-                          listener.startWatch();
-                          console.log("wifi monitor is hooked and started!");
+                          locator.startWatch();
                       }
                   });
               }
