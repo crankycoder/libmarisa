@@ -26,6 +26,9 @@ function TrieLocator(m) {
     this.trie_area_url = null;
     this.ordered_city_url = null;
 
+    this.ordered_city_data = null;
+    this.rtrie_handle = null;
+
     this.has_data_loaded = false;
 
     // This pushes the trie
@@ -202,9 +205,21 @@ TrieLocator.prototype = {
                    // Fetch the marisa trie
                },
     set_worker: function(w) {
-        // TODO: change this to return a closure so that 
-        // the worker is bound to just this instance.
-        this.worker = w;
+        // Clone this object, set the worker on the clone and return
+        // it
+
+        function TmpResult() {
+        }
+
+        // Clone and copy read-only attributes
+        TmpResult.prototype = Object.create(TrieLocator.prototype);
+        var tmp = new TmpResult();
+        tmp.offlinegeo_mod = this.offlinegeo_mod;
+        tmp.has_data_loaded = this.has_data_loaded;
+        tmp.rtrie_handle = this.rtrie_handle;
+        tmp.ordered_city_data = this.ordered_city_data;
+        tmp.worker = w;
+        return tmp;
     },
     startWatch: function()
     {

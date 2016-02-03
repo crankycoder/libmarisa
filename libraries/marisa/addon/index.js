@@ -48,11 +48,11 @@ var page = pageMod.PageMod({
                       // Note: the trielookup needs to return an
                       // object for *each* worker and the lookup must
                       // operate scoped to just that worker.
-                      getLocator().set_worker(worker);
+                      locator_worker = getLocator().set_worker(worker);
 
                       console.log("Addon received message: ["+addonMessage+"]");
                       if (addonMessage == "startOfflineScan") {
-                          getLocator().startWatch();
+                          locator_worker.startWatch();
                       }
                   });
               }
