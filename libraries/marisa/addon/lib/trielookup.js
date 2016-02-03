@@ -23,9 +23,10 @@ function TrieLocator(m) {
     // These URLs are preconfigured in my test
     // server.
     this.offlinegeo_mod = m;
-    this.default_trie_url = "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/newmarket/area.trie";
-    this.ordered_city_url = "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/newmarket/ordered_city.csv";
+    this.trie_area_url = null;
+    this.ordered_city_url = null;
 
+    this.has_data_loaded = false;
 
     // This pushes the trie
     // into C++ emscripten
@@ -35,28 +36,28 @@ function TrieLocator(m) {
 
 
 TrieLocator.prototype = {
-    fetchTrie: function(trie_url) {
+    setDataURLs: function(trie_url, city_url) {
+        this.trie_area_url = trie_url;
+        this.ordered_city_url = city_url;
+    },
+    fetchTrie: function() {
                    // This method grabs the trie off the
                    // webserver.  We return an integer array
                    // of data which represents the bytes
                    // within the trie.
                    // On failure, we return null.
 
-                   if (trie_url) {
-                       // Use the default trie URL if
-                       // nothing is passed in.
-                       this.default_trie_url = trie_url;
-                   }
-
-                   var chainAsyncFetchTrie = (trie_url) => {
-                       console.log("successfully chained off the async fetch of the marisa trie!");
+                   var chainAsyncFetchTrie = () => {
+                       console.log("Fetching: " + this.trie_area_url);
                        NetUtil.asyncFetch(
-                               this.default_trie_url,
+                               this.trie_area_url,
                                (aInputStream, aResult) => {
                                    // Check that we had success.
                                    if (!components.isSuccessCode(aResult))
                        {
+                           this.has_data_loaded = false;
                            console.log("An error occured while fetching the trie: " + aResult);
+                           this.worker.port.emit("offline_fix_unavailable", {});
                            return null;
                        } else {
                            var bstream = Cc["@mozilla.org/binaryinputstream;1"].
@@ -100,6 +101,9 @@ TrieLocator.prototype = {
                            // in emscripten land
                            this.offlinegeo_mod._free(dataHeap.byteOffset);
                            console.log("free'd bytes for dataHeap.byteOffset");
+
+                           this.has_data_loaded = true;
+                           console.log("marked data loaded to true");
                        }
 
                        // I have no idea why I have
@@ -115,19 +119,24 @@ TrieLocator.prototype = {
 
 
                    // Fetch the city tiles
+                   console.log("Fetching: " + this.ordered_city_url);
                    NetUtil.asyncFetch(
                            this.ordered_city_url,
                            (aInputStream, aResult) => {
                                // Check that we had success.
+                              console.log("Fetching the City URL gave a ["+aResult+"] status code");
                                if (!components.isSuccessCode(aResult))
                    {
+                       this.has_data_loaded = false;
                        console.log("An error occured while fetching the ordered tile data: " + aResult);
+                       this.worker.port.emit("offline_fix_unavailable", {});
                        return null;
                    } else {
                        var bstream = Cc["@mozilla.org/binaryinputstream;1"].
                        createInstance(Ci.nsIBinaryInputStream);
                    bstream.setInputStream(aInputStream);
                    var bytes = bstream.readBytes(bstream.available());
+                   console.log("bytes length for city tile CSV: " + bytes.length);
 
                    // Extract each of `bytes.charCodeAt(index)`
                    // and stuff it into an integer
@@ -188,8 +197,13 @@ TrieLocator.prototype = {
     },
     startWatch: function()
     {
-        wifi_service.startWatching(this);
-        console.log("wifi monitor is hooked and started!");
+        if (this.has_data_loaded) {
+            wifi_service.startWatching(this);
+            console.log("wifi monitor is hooked and started!");
+        } else {
+            // No data is loaded - immediately return a failure
+            // message
+        }
     },
     onChange: function (accessPoints)
     {

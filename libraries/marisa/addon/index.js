@@ -7,21 +7,32 @@ var offlinegeo_mod = libofflinegeo.offline_factory();
 
 var libtrielookup = require("./lib/trielookup");
 
-function onPrefChange(prefName) {
-    console.log("The preference " + prefName + " value has changed!");
-    console.log("New pref value: [" + simple_prefs.prefs[prefName] + "]");
-    // TODO: update the trie and ordered city tile data herd
-}
-
-simple_prefs.on("offlineCity", onPrefChange);
 
 // TODO: do a quick test to see if we've downloaded any trie and city
 // tile data.  If no such content exists in persistent storage, force
 // a download of the data.
-//
-//
+
 var locator = new libtrielookup.TrieLocator(offlinegeo_mod);
-locator.fetchTrie();
+
+function update_city_urls(locator) {
+    var offline_base_url = simple_prefs.prefs["offlineCity"];
+    var trie_url = offline_base_url + "/area.trie";
+    var city_url = offline_base_url + "/ordered_city.csv";
+
+    console.log("Updating with URLs: ["+trie_url+"]");
+    console.log("Updating with URLs: ["+city_url+"]");
+    locator.setDataURLs(trie_url, city_url);
+    locator.fetchTrie();
+}
+
+// Register an update listener
+function onPrefChange(prefName) {
+    console.log("The preference " + prefName + " value has changed!");
+    console.log("New pref value: [" + simple_prefs.prefs[prefName] + "]");
+    update_city_urls(locator);
+}
+update_city_urls(locator);
+simple_prefs.on("offlineCity", onPrefChange);
 
 var page = pageMod.PageMod({
     include: "*",

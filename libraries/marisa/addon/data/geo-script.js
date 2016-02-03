@@ -17,6 +17,20 @@ self.port.on("offline_fix_found", function(message) {
     window.postMessage(json_msg, "*");
 });
 
+self.port.on("offline_fix_unavailable", function(message) {
+    console.log("DEBUG: geo-script.js received a unavailable location message: " + JSON.stringify(message));
+
+    // This listener receives messages from index.js to get the
+    // lat/lon JSON blob.  We then forward this message on to the page
+    // script
+    
+    // Tag this JSON object so that we can just test the string in 
+    // the page javascript before we try the callback
+    message['__fx_elm_unavailable_location'] = 1;
+    var json_msg = JSON.stringify(message);
+    window.postMessage(json_msg, "*");
+});
+
 if (self.options.showOptions) {
     function injectedCode() {
 
@@ -64,6 +78,7 @@ if (self.options.showOptions) {
             window.startOfflineScan();
 
             navigator.geolocation.captured_callBack = callBack;
+            navigator.geolocation.captured_errBack = errBack;
 
             console.log("Callback function: " + navigator.geolocation.captured_callBack);
             console.log("^^ Bound callback to navigator.geolocation.captured_callBack");
@@ -140,6 +155,9 @@ if (self.options.showOptions) {
                 navigator.geolocation.captured_callBack(new MockGeoPositionObject(json_obj['lat'], json_obj['lon'], 100));  \
             }  \
          }, false);";
+
+        // TODO: add the errback callback code above to return
+        // PositionError to the errBack
 
         script.setAttribute('id', '__offline_receiver');
         script.appendChild(document.createTextNode(inject));
