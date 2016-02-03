@@ -57,13 +57,19 @@ TrieLocator.prototype = {
                        {
                            this.has_data_loaded = false;
                            console.log("An error occured while fetching the trie: " + aResult);
-                           this.worker.port.emit("offline_fix_unavailable", {});
                            return null;
                        } else {
                            var bstream = Cc["@mozilla.org/binaryinputstream;1"].
                            createInstance(Ci.nsIBinaryInputStream);
                        bstream.setInputStream(aInputStream);
                        var bytes = bstream.readBytes(bstream.available());
+                       if (bytes.length < 10000) {
+                           // There's no way this is a proper CSV
+                           // file.  Just abort.
+                           console.log("Aborting with short trie file error.");
+                           this.has_data_loaded = false;
+                           return;
+                       }
 
                        // Extract each of `bytes.charCodeAt(index)`
                        // and stuff it into an integer
@@ -94,14 +100,15 @@ TrieLocator.prototype = {
                                    nDataBytes);
                            dataHeap.set(new Uint8Array(byteData.buffer));
 
+                           console.log("Pushing trie data into emscripten heap");
                            this.rtrie_handle = this.push_trie(nDataBytes, dataPtr);
+                           console.log("rtrie handle returned: " + this.rtrie_handle);
 
                            // You must free the
                            // memory after playing
                            // in emscripten land
                            this.offlinegeo_mod._free(dataHeap.byteOffset);
                            console.log("free'd bytes for dataHeap.byteOffset");
-
                            this.has_data_loaded = true;
                            console.log("marked data loaded to true");
                        }
@@ -129,66 +136,70 @@ TrieLocator.prototype = {
                    {
                        this.has_data_loaded = false;
                        console.log("An error occured while fetching the ordered tile data: " + aResult);
-                       this.worker.port.emit("offline_fix_unavailable", {});
                        return null;
                    } else {
                        var bstream = Cc["@mozilla.org/binaryinputstream;1"].
                        createInstance(Ci.nsIBinaryInputStream);
-                   bstream.setInputStream(aInputStream);
-                   var bytes = bstream.readBytes(bstream.available());
-                   console.log("bytes length for city tile CSV: " + bytes.length);
-
-                   // Extract each of `bytes.charCodeAt(index)`
-                   // and stuff it into an integer
-                   // array and pass it into C.
-
-                   // Extract the bytes and stuff
-                   // them into a heap allocated
-                   // object that C++ can read from
-                   this.int_array = [];
-                   for (var i=0;i<bytes.length;i++) {
-                       this.int_array.push(bytes.charCodeAt(i));
-                   }
-                   this.ordered_city_data = PP.parse(bytes).data;
-
-                   for (let i=this.ordered_city_data.length-1; i >= 0; i--) {
-                       // clean up the
-                       // ordered city data to make
-                       // sure all rows are 2
-                       // elements long and cast
-                       // all elements into integer
-                       // This can be done
-                       // within the parse
-                       // function on
-                       // PP.parse(...)
-                       var row_data = this.ordered_city_data[i];
-                       if (row_data.length != 2) {
-                           this.ordered_city_data = this.ordered_city_data.slice(0,i);
-                       } else {
-                           row_data[0] = parseInt(row_data[0], 10);
-                           row_data[1] = parseInt(row_data[1], 10);
+                       bstream.setInputStream(aInputStream);
+                       var bytes = bstream.readBytes(bstream.available());
+                       if (bytes.length < 10000) {
+                           // There's no way this is a proper CSV
+                           // file.  Just abort.
+                           console.log("Aborting with short CSV file error.");
+                           this.has_data_loaded = false;
+                           return;
                        }
-                   }
+                       console.log("bytes length for city tile CSV: " + bytes.length);
+
+                       // Extract each of `bytes.charCodeAt(index)`
+                       // and stuff it into an integer
+                       // array and pass it into C.
+
+                       // Extract the bytes and stuff
+                       // them into a heap allocated
+                       // object that C++ can read from
+                       this.int_array = [];
+                       for (var i=0;i<bytes.length;i++) {
+                           this.int_array.push(bytes.charCodeAt(i));
+                       }
+                       this.ordered_city_data = PP.parse(bytes).data;
+
+                       for (let i=this.ordered_city_data.length-1; i >= 0; i--) {
+                           // clean up the
+                           // ordered city data to make
+                           // sure all rows are 2
+                           // elements long and cast
+                           // all elements into integer
+                           // This can be done
+                           // within the parse
+                           // function on
+                           // PP.parse(...)
+                           var row_data = this.ordered_city_data[i];
+                           if (row_data.length != 2) {
+                               this.ordered_city_data = this.ordered_city_data.slice(0,i);
+                           } else {
+                               row_data[0] = parseInt(row_data[0], 10);
+                               row_data[1] = parseInt(row_data[1], 10);
+                           }
+                       }
 
 
-                   // Dump a typed array of data into a file
-                   var profileDir = FileUtils.getFile("ProfD", []);
-                   var atomicCallback = (aResult) => {
-                       console.log("Status of writing city tile data: " + aResult);
-                       chainAsyncFetchTrie();
-                   }
+                       // Dump a typed array of data into a file
+                       var profileDir = FileUtils.getFile("ProfD", []);
+                       var atomicCallback = (aResult) => {
+                           console.log("Status of writing city tile data: " + aResult);
+                           chainAsyncFetchTrie();
+                       }
 
-                   // I have no idea why I have
-                   // to do this double
-                   // Uint8Array copy here, and
-                   // in the atomicCallback
-                   OS.File.writeAtomic(profileDir.path + "/ordered_city.csv",
-                           Uint8Array.from(this.int_array, (n) => n)).then(
-                           atomicCallback);
-                   }}
-                   )
-
-                       // Fetch the marisa trie
+                       // I have no idea why I have
+                       // to do this double
+                       // Uint8Array copy here, and
+                       // in the atomicCallback
+                       OS.File.writeAtomic(profileDir.path + "/ordered_city.csv",
+                               Uint8Array.from(this.int_array, (n) => n)).then(
+                               atomicCallback);
+                   }})
+                   // Fetch the marisa trie
                },
     set_worker: function(w) {
         // TODO: change this to return a closure so that 
