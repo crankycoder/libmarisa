@@ -16,8 +16,12 @@ using namespace std;
 long EMSCRIPTEN_KEEPALIVE push_trie(int length, int* int_trie_bytes) {
 
     EM_ASM(
-        FS.mkdir('/IDBFS');
-        FS.mount(IDBFS, {}, '/IDBFS');
+        try {
+            FS.mkdir('/IDBFS');
+            FS.mount(IDBFS, {}, '/IDBFS');
+        } catch(err) {
+            console.log(err.message);
+        }
     );
 
     FILE *fp;
