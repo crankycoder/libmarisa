@@ -1,16 +1,9 @@
 var self = require("sdk/self");
 var pageMod = require("sdk/page-mod");
 var simple_prefs = require("sdk/simple-prefs");
-
 var libofflinegeo = require("./lib/offlinegeo");
 var offlinegeo_mod = libofflinegeo.offline_factory();
-
 var libtrielookup = require("./lib/trielookup");
-
-
-// TODO: do a quick test to see if we've downloaded any trie and city
-// tile data.  If no such content exists in persistent storage, force
-// a download of the data.
 
 var locator = new libtrielookup.TrieLocator(offlinegeo_mod);
 
