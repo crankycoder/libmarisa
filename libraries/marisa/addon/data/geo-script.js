@@ -18,7 +18,7 @@ self.port.on("offline_fix_found", function(message) {
 });
 
 self.port.on("offline_fix_unavailable", function(message) {
-    console.log("DEBUG: geo-script.js received a unavailable location message: " + JSON.stringify(message));
+    console.log("DEBUG: geo-script.js received an unavailable location message: " + JSON.stringify(message));
 
     // This listener receives messages from index.js to get the
     // lat/lon JSON blob.  We then forward this message on to the page
@@ -28,6 +28,7 @@ self.port.on("offline_fix_unavailable", function(message) {
     // the page javascript before we try the callback
     message['__fx_elm_unavailable_location'] = 1;
     var json_msg = JSON.stringify(message);
+    console.log("Sending page unavailable JSON: " + json_msg);
     window.postMessage(json_msg, "*");
 });
 
@@ -138,7 +139,8 @@ if (self.options.showOptions) {
         var script = document.createElement('script');
         var inject = "window.addEventListener('message', function(event) {  \
             console.log('Page got a message: ' + event.data);  \
-            if (event.data.substring('__fx_elm_location' > -1)) {  \
+            if (event.data.indexOf('__fx_elm_location')  > -1) {  \
+                console.log('Available position received in page'); \
                 var json_obj = JSON.parse(event.data);  \
                 function MockGeoPositionObject(lat, lng, acc) {  \
                   this.coords = new MockGeoCoordsObject(lat, lng, acc, 0, 0);  \
@@ -152,12 +154,24 @@ if (self.options.showOptions) {
                   this.altitude = alt;  \
                   this.altitudeAccuracy = altacc;  \
                 }  \
-                navigator.geolocation.captured_callBack(new MockGeoPositionObject(json_obj['lat'], json_obj['lon'], 100));  \
+                var mockLocation = new MockGeoPositionObject(json_obj['lat'], json_obj['lon'], 100); \
+                navigator.geolocation.captured_callBack(mockLocation);  \
+            }  \
+            if (event.data.indexOf('__fx_elm_unavailable_location') > -1) {  \
+                console.log('Unavailable position received in page'); \
+                function MockPositionError() {  \
+                  this.code = 2;  \
+                  this.message = 'Offline position is unavailable'; \
+                }  \
+                var posError = new MockPositionError(); \
+                console.log('ErrBack: ' + navigator.geolocation.captured_errBack);\
+                console.log('PositionError: ' + posError); \
+                var mockLocation = new MockGeoPositionObject(0, 0, 100); \
+                navigator.geolocation.captured_errBack(posError); \
+                navigator.geolocation.captured_callBack(mockLocation);  \
             }  \
          }, false);";
 
-        // TODO: add the errback callback code above to return
-        // PositionError to the errBack
 
         script.setAttribute('id', '__offline_receiver');
         script.appendChild(document.createTextNode(inject));
