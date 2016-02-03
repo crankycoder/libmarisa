@@ -212,7 +212,9 @@ TrieLocator.prototype = {
             wifi_service.startWatching(this);
             console.log("wifi monitor is hooked and started!");
         } else {
-            // No data is loaded - immediately return a failure
+            console.log("No data is loaded!");
+            this.worker.port.emit("offline_fix_unavailable", {});
+            // TODO: No data is loaded - immediately return a failure
             // message
         }
     },
