@@ -56,18 +56,14 @@ var page = pageMod.PageMod({
 
                       var browserWindow = winutils.getMostRecentBrowserWindow();
                       var gBrowser = browserWindow.gBrowser;
-                      var popupBox = browserWindow.document.getElementById("notification-popup-box");
-                      var geoIcon = browserWindow.document.getElementById("geo-notification-icon");
-                      popupBox.setAttribute("hidden", "false");
-                      geoIcon.setAttribute("showing", "true");
 
                       var notify  = new PopupNotifications(gBrowser,
                           browserWindow.document.getElementById("notification-popup"),
                           browserWindow.document.getElementById("notification-popup-box"));
 
-                      notify.show(gBrowser, "sample-popup",
+                      notify.show(gBrowser, "geolocation",
                           "This is a sample popup notification.",
-                          null, /* anchor ID */
+                          "geo-notification-icon", /* anchor ID */
                           {
                               label: "Do Something",
                               accessKey: "D",
