@@ -4,10 +4,7 @@ var simple_prefs = require("sdk/simple-prefs");
 var libofflinegeo = require("./lib/offlinegeo");
 var offlinegeo_mod = libofflinegeo.offline_factory();
 var libtrielookup = require("./lib/trielookup");
-var winutils = require('sdk/window/utils');
-var {Cc, Ci, Cu, Cr, Cm, components} = require("chrome");
-
-Cu.import('resource://gre/modules/PopupNotifications.jsm');
+var libnotify = require("./lib/notification");
 
 var locator_container = {};
 locator_container['locator'] = new libtrielookup.TrieLocator(offlinegeo_mod);
@@ -54,23 +51,12 @@ var page = pageMod.PageMod({
                       // operate scoped to just that worker.
                       locator_worker = getLocator().set_worker(worker);
 
-                      var browserWindow = winutils.getMostRecentBrowserWindow();
-                      var gBrowser = browserWindow.gBrowser;
+                      var offlineNotification = new libnotify.OfflineNotification();
+                      offlineNotification.show();
 
-                      var notify  = new PopupNotifications(gBrowser,
-                          browserWindow.document.getElementById("notification-popup"),
-                          browserWindow.document.getElementById("notification-popup-box"));
-
-                      notify.show(gBrowser, "geolocation",
-                          "This is a sample popup notification.",
-                          "geo-notification-icon", /* anchor ID */
-                          {
-                              label: "Do Something",
-                              accessKey: "D",
-                              callback: function() {alert("Doing something awesome!"); }
-                          },
-                          null  /* secondary action */
-                          );
+                      // TODO: push this stuff into a callback
+                      // function and pass it into the notification
+                      // box
 
                       console.log("Addon received message: ["+addonMessage+"]");
                       if (addonMessage == "startOfflineScan") {
