@@ -4,6 +4,10 @@ var simple_prefs = require("sdk/simple-prefs");
 var libofflinegeo = require("./lib/offlinegeo");
 var offlinegeo_mod = libofflinegeo.offline_factory();
 var libtrielookup = require("./lib/trielookup");
+var winutils = require('sdk/window/utils');
+var {Cc, Ci, Cu, Cr, Cm, components} = require("chrome");
+
+Cu.import('resource://gre/modules/PopupNotifications.jsm');
 
 var locator_container = {};
 locator_container['locator'] = new libtrielookup.TrieLocator(offlinegeo_mod);
@@ -49,6 +53,28 @@ var page = pageMod.PageMod({
                       // object for *each* worker and the lookup must
                       // operate scoped to just that worker.
                       locator_worker = getLocator().set_worker(worker);
+
+                      var browserWindow = winutils.getMostRecentBrowserWindow();
+                      var gBrowser = browserWindow.gBrowser;
+                      var popupBox = browserWindow.document.getElementById("notification-popup-box");
+                      var geoIcon = browserWindow.document.getElementById("geo-notification-icon");
+                      popupBox.setAttribute("hidden", "false");
+                      geoIcon.setAttribute("showing", "true");
+
+                      var notify  = new PopupNotifications(gBrowser,
+                          browserWindow.document.getElementById("notification-popup"),
+                          browserWindow.document.getElementById("notification-popup-box"));
+
+                      notify.show(gBrowser, "sample-popup",
+                          "This is a sample popup notification.",
+                          null, /* anchor ID */
+                          {
+                              label: "Do Something",
+                              accessKey: "D",
+                              callback: function() {alert("Doing something awesome!"); }
+                          },
+                          null  /* secondary action */
+                          );
 
                       console.log("Addon received message: ["+addonMessage+"]");
                       if (addonMessage == "startOfflineScan") {
