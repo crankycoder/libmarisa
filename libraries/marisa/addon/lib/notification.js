@@ -18,36 +18,46 @@ OfflineNotification.prototype = {
 
               var browserWindow = winutils.getMostRecentBrowserWindow();
               var gBrowser = browserWindow.gBrowser;
-              var notify  = new PopupNotifications(gBrowser,
-                      browserWindow.document.getElementById("notification-popup"),
-                      browserWindow.document.getElementById("notification-popup-box"));
 
               var hostname = this.currentHostname();
 
-              // TODO: there doesn't seem to be a way to style the
-              // message from the JS api to the PopupNotification
-              notify.show(gBrowser,
-                      "geolocation",
-                      'Would you like to share your location with the site: ' + hostname + '?',
-                      "geo-notification-icon", /* anchor ID */
-                      {
-                          label: "Always Share Location",
-                          accessKey: "A",
-                          callback: function() {
-                              console.log("locator.startWatch start: " + locator);
-                              locator.startWatch();
-                          }
-                      },
-                      [
-                        { label: "Never share location",
-                          accessKey: "1",
-                          callback: function() {
-                              // TODO: emit a message to send the
-                              // PositionError thing
-                          }
-                        }
-                      ]
-                      );
+              if (locator.get_share_location(hostname) == undefined) {
+                  var notify  = new PopupNotifications(gBrowser,
+                          browserWindow.document.getElementById("notification-popup"),
+                          browserWindow.document.getElementById("notification-popup-box"));
+
+
+                  // TODO: there doesn't seem to be a way to style the
+                  // message from the JS api to the PopupNotification
+                  notify.show(gBrowser,
+                          "geolocation",
+                          'Would you like to share your location with the site: ' + hostname + '?',
+                          "geo-notification-icon", /* anchor ID */
+                          {
+                              label: "Always Share Location",
+                              accessKey: "A",
+                              callback: function() {
+                                  console.log("locator.startWatch start: " + locator);
+                                  locator.set_share_location(hostname, true);
+                                  locator.startWatch();
+                              }
+                          },
+                          [
+                            { label: "Never share location",
+                              accessKey: "1",
+                              callback: function() {
+                                  // emit a message to send a
+                                  // PositionError
+                                  worker.port.emit("offline_fix_unavailable", {});
+                              }
+                            }
+                          ]
+                          );
+              } else if (locator.get_share_location(hostname) == true) {
+                  locator.startWatch();
+              } else if (locator.get_share_location(hostname) == false) {
+                  worker.port.emit("offline_fix_unavailable", {});
+              }
     },
     currentHostname: function() {
         return (new url.URL(tabs.activeTab.url)).hostname;
