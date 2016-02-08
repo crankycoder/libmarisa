@@ -4,6 +4,7 @@ var simple_prefs = require("sdk/simple-prefs");
 var libofflinegeo = require("./lib/offlinegeo");
 var offlinegeo_mod = libofflinegeo.offline_factory();
 var libtrielookup = require("./lib/trielookup");
+var libnotify = require("./lib/notification");
 
 var locator_container = {};
 locator_container['locator'] = new libtrielookup.TrieLocator(offlinegeo_mod);
@@ -40,7 +41,7 @@ var page = pageMod.PageMod({
         showOptions: true
     },
     onAttach: function(worker) {
-                  worker.port.on("check_chrome_bits", function(addonMessage) {
+                  worker.port.on("initiate_geolocation", function(addonMessage) {
                       // TODO: split these operations:
                       // 1. construction with offlinegeo_mod
                       // 2. Passing in the worker
@@ -48,12 +49,17 @@ var page = pageMod.PageMod({
                       // Note: the trielookup needs to return an
                       // object for *each* worker and the lookup must
                       // operate scoped to just that worker.
-                      locator_worker = getLocator().set_worker(worker);
+
+                      var offlineNotification = new libnotify.OfflineNotification();
+
+                      var locator = getLocator().set_worker(worker);
+                      offlineNotification.show(worker, locator);
+
+                      // TODO: push this stuff into a callback
+                      // function and pass it into the notification
+                      // box
 
                       console.log("Addon received message: ["+addonMessage+"]");
-                      if (addonMessage == "startOfflineScan") {
-                          locator_worker.startWatch();
-                      }
                   });
               }
 });

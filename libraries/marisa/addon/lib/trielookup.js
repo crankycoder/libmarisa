@@ -31,6 +31,8 @@ function TrieLocator(m) {
 
     this.has_data_loaded = false;
 
+    this.share_location = {};
+
     // This pushes the trie
     // into C++ emscripten
     // space
@@ -204,6 +206,16 @@ TrieLocator.prototype = {
                    }})
                    // Fetch the marisa trie
                },
+    set_share_location: function(hostname, share_flag) {
+        // Note that this should only be called
+        // from a specific worker
+        // Note that this is definitely not safe for e10s
+        this._parent.share_location[hostname] = share_flag;
+    },
+    get_share_location: function(hostname) {
+        // Note that this is definitely not safe for e10s
+        return this._parent.share_location[hostname];
+    },
     set_worker: function(w) {
         // Clone this object, set the worker on the clone and return
         // it
@@ -218,7 +230,9 @@ TrieLocator.prototype = {
         tmp.has_data_loaded = this.has_data_loaded;
         tmp.rtrie_handle = this.rtrie_handle;
         tmp.ordered_city_data = this.ordered_city_data;
+        tmp.share_location = this.share_location;
         tmp.worker = w;
+        tmp._parent = this;
         return tmp;
     },
     startWatch: function()
