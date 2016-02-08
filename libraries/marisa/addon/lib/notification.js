@@ -34,20 +34,27 @@ OfflineNotification.prototype = {
                           'Would you like to share your location with the site: ' + hostname + '?',
                           "geo-notification-icon", /* anchor ID */
                           {
-                              label: "Always Share Location",
+                              label: "Share Location",
                               accessKey: "A",
                               callback: function() {
                                   console.log("locator.startWatch start: " + locator);
-                                  locator.set_share_location(hostname, true);
                                   locator.startWatch();
                               }
                           },
                           [
+                            { label: "Always share location",
+                              accessKey: "B",
+                              callback: function() {
+                                  locator.set_share_location(hostname, true);
+                                  locator.startWatch();
+                              }
+                            },
                             { label: "Never share location",
-                              accessKey: "1",
+                              accessKey: "C",
                               callback: function() {
                                   // emit a message to send a
                                   // PositionError
+                                  locator.set_share_location(hostname, false);
                                   worker.port.emit("offline_fix_unavailable", {});
                               }
                             }
