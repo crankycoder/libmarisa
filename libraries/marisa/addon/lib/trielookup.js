@@ -355,7 +355,7 @@ TrieLocator.prototype = {
             // resolve a fix
             //
             // Send back an empty match
-            this.worker.port.emit("offline_fix_found", {});
+            this.worker.port.emit("offline_fix_unavailable", {});
         }
 
         wifi_service.stopWatching(this);
