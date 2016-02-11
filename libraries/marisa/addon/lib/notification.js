@@ -6,9 +6,16 @@ var winutils = require('sdk/window/utils');
 var tabs = require('sdk/tabs');
 var url = require('sdk/url');
 
+Cu.import("resource://gre/modules/Services.jsm");
 Cu.import('resource://gre/modules/PopupNotifications.jsm');
 
 function OfflineNotification() {
+}
+
+function makeURI(aURL, aOriginCharset, aBaseURI) {
+    var ioService = Cc["@mozilla.org/network/io-service;1"]
+        .getService(Ci.nsIIOService);
+    return ioService.newURI(aURL, aOriginCharset, aBaseURI);
 }
 
 OfflineNotification.prototype = {
@@ -20,6 +27,7 @@ OfflineNotification.prototype = {
               var gBrowser = browserWindow.gBrowser;
 
               var hostname = this.currentHostname();
+              var thisURI = makeURI(tabs.activeTab.url);
 
               if (locator.get_share_location(hostname) == undefined) {
                   var notify  = new PopupNotifications(gBrowser,
@@ -58,7 +66,8 @@ OfflineNotification.prototype = {
                                   worker.port.emit("offline_fix_unavailable", {});
                               }
                             }
-                          ]
+                          ],
+                          { learnMoreURL: Services.urlFormatter.formatURLPref("browser.geolocation.warning.infoURL"), }
                           );
               } else if (locator.get_share_location(hostname) == true) {
                   locator.startWatch();
