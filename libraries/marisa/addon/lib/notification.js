@@ -8,14 +8,19 @@ var url = require('sdk/url');
 
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import('resource://gre/modules/PopupNotifications.jsm');
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-function OfflineNotification() {
-}
+XPCOMUtils.defineLazyGetter(this, "gBrowserBundle", function() {
+    return Services.strings.createBundle("chrome://browser/locale/browser.properties");
+});
 
 function makeURI(aURL, aOriginCharset, aBaseURI) {
     var ioService = Cc["@mozilla.org/network/io-service;1"]
         .getService(Ci.nsIIOService);
     return ioService.newURI(aURL, aOriginCharset, aBaseURI);
+}
+
+function OfflineNotification() {
 }
 
 OfflineNotification.prototype = {
@@ -34,12 +39,19 @@ OfflineNotification.prototype = {
                           browserWindow.document.getElementById("notification-popup"),
                           browserWindow.document.getElementById("notification-popup-box"));
 
+                  var message = "";
+                  if (thisURI.schemeIs("file")) {
+                      message = gBrowserBundle.GetStringFromName("geolocation.shareWithFile2");
+                  } else {
+                      message = gBrowserBundle.GetStringFromName("geolocation.shareWithSite2");
+                  }
 
-                  // TODO: there doesn't seem to be a way to style the
-                  // message from the JS api to the PopupNotification
+                  var aOptions = { displayURI: thisURI,
+                                   learnMoreURL: Services.urlFormatter.formatURLPref("browser.geolocation.warning.infoURL")};
+
                   notify.show(gBrowser,
                           "geolocation",
-                          'Would you like to share your location with the site: ' + hostname + '?',
+                          message,
                           "geo-notification-icon", /* anchor ID */
                           {
                               label: "Share Location",
@@ -66,9 +78,7 @@ OfflineNotification.prototype = {
                                   worker.port.emit("offline_fix_unavailable", {});
                               }
                             }
-                          ],
-                          { learnMoreURL: Services.urlFormatter.formatURLPref("browser.geolocation.warning.infoURL"), }
-                          );
+                          ], aOptions);
               } else if (locator.get_share_location(hostname) == true) {
                   locator.startWatch();
               } else if (locator.get_share_location(hostname) == false) {
