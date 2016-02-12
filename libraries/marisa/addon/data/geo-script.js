@@ -168,7 +168,6 @@ if (self.options.showOptions) {
                 console.log('PositionError: ' + posError); \
                 var mockLocation = new MockGeoPositionObject(0, 0, 100); \
                 navigator.geolocation.captured_errBack(posError); \
-                //navigator.geolocation.captured_callBack(mockLocation);  \
             }  \
          }, false);";
 
