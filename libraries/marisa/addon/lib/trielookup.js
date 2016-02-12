@@ -18,6 +18,10 @@ var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonito
 
 var sha256 = require("./sha256");
 
+// Destructuring assignment to get
+// utility functions
+var { add } = require('sdk/util/array');
+
 function TrieLocator(m) {
     // These URLs are preconfigured in my test
     // server.
@@ -238,10 +242,6 @@ TrieLocator.prototype = {
     },
     onChange: function (accessPoints)
     {
-        // Destructuring assignment to get
-        // utility functions
-        let { add } = require('sdk/util/array');
-
         let macList = [];
 
         for (var i=0; i < accessPoints.length; i++) {
@@ -346,9 +346,7 @@ TrieLocator.prototype = {
             // Send back an empty match
             this.worker.port.emit("offline_fix_unavailable", {});
         }
-
         wifi_service.stopWatching(this);
-
     },
     onError: function (value) {
                  alert("error: " +value);
