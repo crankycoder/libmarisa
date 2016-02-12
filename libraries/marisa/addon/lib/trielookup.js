@@ -12,12 +12,15 @@ Cu.import("resource://gre/modules/FileUtils.jsm");
 Cu.import("resource://gre/modules/osfile.jsm");
 
 console.log("Loading papaparse!");
-PP = require("./papaparse");
-console.log("Successfully loaded papaparse: " + PP);
+var PP = require("./papaparse");
 
 var wifi_service = Cc["@mozilla.org/wifi/monitor;1"].getService(Ci.nsIWifiMonitor);
 
 var sha256 = require("./sha256");
+
+// Destructuring assignment to get
+// utility functions
+var { add } = require('sdk/util/array');
 
 function TrieLocator(m) {
     // These URLs are preconfigured in my test
@@ -206,16 +209,6 @@ TrieLocator.prototype = {
                    }})
                    // Fetch the marisa trie
                },
-    set_share_location: function(hostname, share_flag) {
-        // Note that this should only be called
-        // from a specific worker
-        // Note that this is definitely not safe for e10s
-        this._parent.share_location[hostname] = share_flag;
-    },
-    get_share_location: function(hostname) {
-        // Note that this is definitely not safe for e10s
-        return this._parent.share_location[hostname];
-    },
     set_worker: function(w) {
         // Clone this object, set the worker on the clone and return
         // it
@@ -249,10 +242,6 @@ TrieLocator.prototype = {
     },
     onChange: function (accessPoints)
     {
-        // Destructuring assignment to get
-        // utility functions
-        let { add } = require('sdk/util/array');
-
         let macList = [];
 
         for (var i=0; i < accessPoints.length; i++) {
@@ -357,9 +346,7 @@ TrieLocator.prototype = {
             // Send back an empty match
             this.worker.port.emit("offline_fix_unavailable", {});
         }
-
         wifi_service.stopWatching(this);
-
     },
     onError: function (value) {
                  alert("error: " +value);
