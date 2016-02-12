@@ -83,10 +83,6 @@ if (self.options.showOptions) {
 
             console.log("Callback function: " + navigator.geolocation.captured_callBack);
             console.log("^^ Bound callback to navigator.geolocation.captured_callBack");
-
-            // TODO: this callback needs to be invoked after a lookup
-            // in the marisa trie
-            //callBack(new MockGeoPositionObject(44.033639,-79.490813, 50));
         };
 
         navigator.geolocation.watchPosition = function(cb1, cb2, options) {
