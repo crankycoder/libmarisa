@@ -62,7 +62,7 @@ OfflineNotification.prototype = {
                               accessKey: "A",
                               callback: function() {
                                   console.log("locator.startWatch start: " + locator);
-                                  sitePermission.setShareSession();
+                                  sitePermission.setAlwaysAsk();
                                   locator.startWatch();
                               }
                           },

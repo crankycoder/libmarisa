@@ -36,6 +36,10 @@ GeoSitePermission.prototype = {
     _getState: function() {
        return SitePermissions.get(this.uri, "geo");
     },
+    setAlwaysAsk: function() {
+       // Always share the location for this domain
+       SitePermissions.set(this.uri, "geo", this.UNKNOWN);
+    },
     setAlwaysShare: function() {
        // Always share the location for this domain
        SitePermissions.set(this.uri, "geo", this.ALLOW);
