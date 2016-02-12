@@ -1,14 +1,16 @@
 exports.OfflineNotification = OfflineNotification;
 
-var self = require("sdk/self");
 var {Cc, Ci, Cu, Cr, Cm, components} = require("chrome");
+
+var self = require('sdk/self');
 var winutils = require('sdk/window/utils');
 var tabs = require('sdk/tabs');
 var url = require('sdk/url');
+var mod_geoperm = require('./geoperm');
 
-Cu.import("resource://gre/modules/Services.jsm");
+Cu.import('resource://gre/modules/Services.jsm');
 Cu.import('resource://gre/modules/PopupNotifications.jsm');
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import('resource://gre/modules/XPCOMUtils.jsm');
 
 XPCOMUtils.defineLazyGetter(this, "gBrowserBundle", function() {
     return Services.strings.createBundle("chrome://browser/locale/browser.properties");
@@ -34,7 +36,9 @@ OfflineNotification.prototype = {
               var hostname = this.currentHostname();
               var thisURI = makeURI(tabs.activeTab.url);
 
-              if (locator.get_share_location(hostname) == undefined) {
+              var sitePermission = new mod_geoperm.GeoSitePermission(thisURI);
+
+              if (sitePermission.isUnknown()) {
                   var notify  = new PopupNotifications(gBrowser,
                           browserWindow.document.getElementById("notification-popup"),
                           browserWindow.document.getElementById("notification-popup-box"));
@@ -58,6 +62,7 @@ OfflineNotification.prototype = {
                               accessKey: "A",
                               callback: function() {
                                   console.log("locator.startWatch start: " + locator);
+                                  sitePermission.setShareSession();
                                   locator.startWatch();
                               }
                           },
@@ -65,7 +70,7 @@ OfflineNotification.prototype = {
                             { label: "Always share location",
                               accessKey: "B",
                               callback: function() {
-                                  locator.set_share_location(hostname, true);
+                                  sitePermission.setAlwaysShare();
                                   locator.startWatch();
                               }
                             },
@@ -74,14 +79,14 @@ OfflineNotification.prototype = {
                               callback: function() {
                                   // emit a message to send a
                                   // PositionError
-                                  locator.set_share_location(hostname, false);
+                                  sitePermission.setBlocked();
                                   worker.port.emit("offline_fix_unavailable", {});
                               }
                             }
                           ], aOptions);
-              } else if (locator.get_share_location(hostname) == true) {
+              } else if (sitePermission.isAlwaysShare() || sitePermission.isSessionSharing()) {
                   locator.startWatch();
-              } else if (locator.get_share_location(hostname) == false) {
+              } else if (sitePermission.isBlocked()) {
                   worker.port.emit("offline_fix_unavailable", {});
               }
     },
