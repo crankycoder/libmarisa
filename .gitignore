@@ -8,7 +8,7 @@ obj
 @*xpi
 
 # Never commit the offlinegeo.js file
-libraries/marisa/addon/lib/offlinegeo.js
+#libraries/marisa/addon/lib/offlinegeo.js
 
 # Never commit the side effect of patching the emscripten output
 libraries/marisa/addon/lib/offlinegeo.js.orig

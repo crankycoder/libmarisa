@@ -7,12 +7,12 @@
       "type": "menulist",
       "title": "City Data Pack",
       "value": "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/newmarket",
-      "options": [{"value": "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/toronto",
-                   "label": "Toronto, ON"},
+      "options": [{"value": "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/silicon_valley",
+                   "label": "Silicon Valley"},
                   {"value": "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/newmarket",
                    "label": "Newmarket, ON"},
-                  {"value": "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/manhattan",
-                   "label": "Manhattan, NY"}]
+                  {"value": "http://ec2-52-1-93-147.compute-1.amazonaws.com/offline_geo/san_francisco",
+                   "label": "San Francisco"}]
   }],
   "description": "A private offline location provider that doesn't require uploading wireless data into a server.",
   "main": "index.js",
