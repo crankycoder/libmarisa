@@ -1,6 +1,6 @@
 exports.TrieLocator = TrieLocator;
 
-var {Cc, Ci, Cu, Cr, Cm, components} = require("chrome");
+const {Cc, Ci, Cu, Cr, Cm, components} = require("chrome");
 
 // Import NetUtil
 Cu.import("resource://gre/modules/NetUtil.jsm");
@@ -21,6 +21,16 @@ var sha256 = require("./sha256");
 // Destructuring assignment to get
 // utility functions
 var { add } = require('sdk/util/array');
+
+function tile2lon(x, z) {
+    return (x/Math.pow(2,z)*360-180);
+}
+
+function tile2lat(y,z) {
+    var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
+    return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
+}
+
 
 function TrieLocator(m) {
     // These URLs are preconfigured in my test
@@ -119,7 +129,7 @@ TrieLocator.prototype = {
                            console.log("free'd bytes for dataHeap.byteOffset");
                            this.has_data_loaded = true;
                            console.log("marked data loaded to true");
-                       }
+                       };
 
                        // I have no idea why I have
                        // to do this double
@@ -128,9 +138,8 @@ TrieLocator.prototype = {
                        OS.File.writeAtomic(profileDir.path + "/cached.rtrie",
                                Uint8Array.from(this.int_array, (n) => n)).then(
                                atomicCallback);
-                       }}
-                       )
-                   }
+                       }});
+                   };
 
 
                    // Fetch the city tiles
@@ -197,7 +206,7 @@ TrieLocator.prototype = {
                        var atomicCallback = (aResult) => {
                            console.log("Status of writing city tile data: " + aResult);
                            chainAsyncFetchTrie();
-                       }
+                       };
 
                        // I have no idea why I have
                        // to do this double
@@ -206,7 +215,7 @@ TrieLocator.prototype = {
                        OS.File.writeAtomic(profileDir.path + "/ordered_city.csv",
                                Uint8Array.from(this.int_array, (n) => n)).then(
                                atomicCallback);
-                   }})
+                   }});
                    // Fetch the marisa trie
                },
     set_worker: function(w) {
@@ -244,7 +253,8 @@ TrieLocator.prototype = {
     {
         let macList = [];
 
-        for (var i=0; i < accessPoints.length; i++) {
+        var i = 0;
+        for (i=0; i < accessPoints.length; i++) {
             var a = accessPoints[i];
 
             // Clean up the BSSID
@@ -252,14 +262,14 @@ TrieLocator.prototype = {
 
             if (bssid) {
                 bssid = bssid.toLowerCase();
-                bssid = bssid.replace(/\W+/g, "")
-                    add(macList, bssid);
+                bssid = bssid.replace(/\W+/g, "");
+                add(macList, bssid);
             }
 
         }
 
         this.macList = macList;
-        for (var i=0;i<macList.length;i++) {
+        for (i=0;i<macList.length;i++) {
             // convert each element in
             // this.macList into a sha256 hexdigest
             // and use the 12 character prefix of
@@ -317,14 +327,6 @@ TrieLocator.prototype = {
             var matched_tile_ids = inverted[max];
             console.log("Matched tile IDs: " + matched_tile_ids);
 
-            function tile2lon(x,z) {
-                return (x/Math.pow(2,z)*360-180);
-            }
-            function tile2lat(y,z) {
-                var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
-                return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
-            }
-
             for (var idx = 0; idx < matched_tile_ids.length; idx++) {
                 var tmp_tileid = matched_tile_ids[idx];
                 var osm_tuple = this.ordered_city_data[tmp_tileid];
@@ -359,4 +361,4 @@ TrieLocator.prototype = {
                         }
                         throw components.results.NS_ERROR_NO_INTERFACE;
                     },
-}
+};

@@ -93,5 +93,5 @@ OfflineNotification.prototype = {
     currentHostname: function() {
         return (new url.URL(tabs.activeTab.url)).hostname;
     }
-}
+};
 
