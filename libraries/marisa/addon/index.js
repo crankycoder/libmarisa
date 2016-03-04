@@ -7,14 +7,14 @@ var libtrielookup = require("./lib/trielookup");
 var libnotify = require("./lib/notification");
 
 var locator_container = {};
-locator_container['locator'] = new libtrielookup.TrieLocator(offlinegeo_mod);
+locator_container.locator = new libtrielookup.TrieLocator(offlinegeo_mod);
 
 function getLocator() {
-    return locator_container['locator'];
+    return locator_container.locator;
 }
 
 function update_city_urls() {
-    var offline_base_url = simple_prefs.prefs["offlineCity"];
+    var offline_base_url = simple_prefs.prefs.offlineCity;
     var trie_url = offline_base_url + "/area.trie";
     var city_url = offline_base_url + "/ordered_city.csv";
 
@@ -54,10 +54,6 @@ var page = pageMod.PageMod({
 
                       var locator = getLocator().set_worker(worker);
                       offlineNotification.show(worker, locator);
-
-                      // TODO: push this stuff into a callback
-                      // function and pass it into the notification
-                      // box
 
                       console.log("Addon received message: ["+addonMessage+"]");
                   });

@@ -53,7 +53,12 @@ OfflineNotification.prototype = {
                   var aOptions = { displayURI: thisURI,
                                    learnMoreURL: Services.urlFormatter.formatURLPref("browser.geolocation.warning.infoURL")};
 
-                  notify.show(gBrowser,
+
+                  // gBrowser.selectedBrowser represents the currently
+                  // selected tab.  Popup notifications are tied to a
+                  // specific tab.  Consider the case of URL badging
+                  // notifications for HTTPS and disabled plugins
+                  notify.show(gBrowser.selectedBrowser,
                           "geolocation",
                           message,
                           "geo-notification-icon", /* anchor ID */
@@ -93,5 +98,5 @@ OfflineNotification.prototype = {
     currentHostname: function() {
         return (new url.URL(tabs.activeTab.url)).hostname;
     }
-}
+};
 
